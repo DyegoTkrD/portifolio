@@ -1,0 +1,41 @@
+# Dyego Seabra
+
+> Dyego Seabra é analista de dados sênior em transição para engenharia de dados, no Brasil (Angra dos Reis, RJ; trabalha remoto). Constrói pipelines de dados com Apache Airflow, BigQuery e PostgreSQL, modela dados em SQL e automatiza processos com Python. Tem 4 anos em dados e é bacharel em Ciência da Computação (Universidade Estácio de Sá, 2025).
+>
+> In English: Dyego Seabra is a senior data analyst moving into data engineering, based in Brazil and working remotely. He builds data pipelines with Apache Airflow, BigQuery and PostgreSQL, models data in SQL and automates processes with Python.
+
+Este arquivo resume o portfólio para assistentes de IA. A versão completa, com o detalhe de cada projeto, está em [llms-full.txt](https://dyegoseabra.com.br/llms-full.txt). Todos os prints do site usam dados fictícios.
+
+## Perfil
+
+- Cargo atual: Analista de Dados Sênior na act digital, com bases de bilhões de linhas por mês no BigQuery
+- Objetivo: vagas de Engenharia de Dados (Data Engineer), no Brasil ou remoto
+- Competências principais: Python, SQL, BigQuery (Google Cloud), Apache Airflow, PostgreSQL, ETL, modelagem de dados
+- Também usa: Power BI, Looker Studio, Metabase, FastAPI, TypeScript, Docker, Git e CI/CD, Linux, LLMs e agentes com n8n
+- Idiomas: português nativo, inglês intermediário
+
+## Projetos de dados
+
+- [Growth OS](https://dyegoseabra.com.br/#growth-os): plataforma de Customer Analytics para um cliente de Direct Response. Pipelines em Apache Airflow trazem a Meta Marketing API e os pagamentos para o PostgreSQL, com carga incremental e reprocessamento idempotente; modelagem em SQL de RFM, coortes, LTV e ROAS por campanha (abr–jun 2026)
+- [Validação de campanhas](https://dyegoseabra.com.br/#campanhas): plataforma em Python e NiceGUI integrada ao BigQuery numa operadora de telecom. Mais de 500 campanhas cadastradas por semana, 20% menos erros de cadastro e 12 horas por semana liberadas (2025)
+- [Finanças pessoais](https://github.com/DyegoTkrD/personal-finances): análise, previsão com ARIMA/SARIMAX e segmentação com K-Means e PCA, código aberto (2025)
+- [Detecção de sonolência](https://github.com/DyegoTkrD/Deteccao-Sonolencia): visão computacional com OpenCV e MediaPipe, código aberto (2024)
+
+## Outros trabalhos
+
+- [Sistema de gestão para bar](https://dyegoseabra.com.br/#bar): em produção todas as noites desde setembro de 2026 (FastAPI, PostgreSQL, React, Docker)
+- [Nexum Finance](https://dyegoseabra.com.br/#nexum): finanças pessoais com IA, migrada para infraestrutura própria (Fastify, PostgreSQL, GitHub Actions)
+- [Agente comercial de WhatsApp](https://dyegoseabra.com.br/#agente): bot multiagente com LLM no n8n, com lead scoring e agente auditor
+
+## Currículo e contato
+
+- [Currículo em português (PDF)](https://dyegoseabra.com.br/assets/Dyego_Seabra_Engenheiro_de_Dados.pdf)
+- [Resume in English (PDF)](https://dyegoseabra.com.br/assets/Dyego_Seabra_Data_Engineer.pdf)
+- [LinkedIn](https://www.linkedin.com/in/dyegoseabradata)
+- [GitHub](https://github.com/DyegoTkrD)
+- E-mail: dyego.tkrd@gmail.com
+- [WhatsApp](https://wa.me/5524999176635)
+
+## Optional
+
+- [Código do site](https://github.com/DyegoTkrD/portifolio)

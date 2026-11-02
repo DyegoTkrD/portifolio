@@ -1,0 +1,18 @@
+# dyegoseabra.com.br — portfólio público. Buscadores e assistentes de IA são bem-vindos.
+User-agent: *
+Allow: /
+
+# Assistentes e buscadores de IA (citados explicitamente para não restar dúvida)
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://dyegoseabra.com.br/sitemap.xml
+# Resumo em Markdown para LLMs: https://dyegoseabra.com.br/llms.txt

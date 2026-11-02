@@ -1,0 +1,243 @@
+# Dyego Seabra
+
+> Dyego Seabra é analista de dados sênior em transição para engenharia de dados, no Brasil (Angra dos Reis, RJ; trabalha remoto). Constrói pipelines de dados com Apache Airflow, BigQuery e PostgreSQL, modela dados em SQL e automatiza processos com Python. Tem 4 anos em dados e é bacharel em Ciência da Computação (Universidade Estácio de Sá, 2025).
+>
+> In English: Dyego Seabra is a senior data analyst moving into data engineering, based in Brazil and working remotely. He builds data pipelines with Apache Airflow, BigQuery and PostgreSQL, models data in SQL and automates processes with Python.
+
+Versão completa do portfólio para assistentes de IA, gerada a partir do texto do site. O resumo está em [llms.txt](https://dyegoseabra.com.br/llms.txt). Todos os prints do site usam dados fictícios.
+
+## Apresentação
+
+Sou Dyego Seabra, analista de dados sênior em transição para engenharia de dados. Construo pipelines, plataformas e automações que tiram o trabalho manual do caminho e deixam o número certo na mão de quem decide.
+
+## Sobre
+
+Trabalho com dados há 4 anos. Hoje sou analista de dados sênior na act digital, alocado na TIM Brasil, com bases de bilhões de linhas por mês no BigQuery, e estou direcionando a carreira para engenharia de dados.
+
+Comecei no suporte técnico da Emex Telecom, uma provedora de internet, e virei o único analista de dados da empresa, atendendo cinco áreas ao mesmo tempo. Isso me ensinou a entender o problema antes de escolher a ferramenta. Hoje também oriento um analista júnior, com divisão de tarefas e code review.
+
+### Trajetória
+
+- **2025 – hoje: Analista de Dados Sênior.** act digital, alocado na TIM Brasil · Pipelines de carga e validação no BigQuery, dashboards em Looker Studio e orientação de um júnior
+- **2024 – 2025: Analista de Dados Pleno.** act digital, alocado na TIM Brasil · Validador para 20+ planilhas e automações em Python que liberaram 8 h por semana
+- **2023 – 2024: Analista de BI.** TIM Brasil, pela act digital · Cerca de 10 dashboards em Power BI e automação em VBA de 60 documentos por mês
+- **2022 – 2023: Analista de BI.** Emex Telecom · Único analista de dados, 30+ dashboards e um modelo de churn em Python
+- **2020 – 2025: Bacharelado em Ciência da Computação.** Universidade Estácio de Sá · Concluído em 2025
+
+### Competências
+
+- **Dados:** Python, SQL, BigQuery, Apache Airflow, PostgreSQL, ETL, Modelagem de dados
+- **BI:** Power BI, Looker Studio, Metabase, Excel e VBA
+- **Software:** FastAPI, TypeScript, Docker, Git e CI/CD, Linux, LLMs e agentes (n8n)
+- **Idiomas:** Português · nativo, Inglês · intermediário
+
+## Projetos
+
+Cada projeto tem um painel de detalhes no site, aberto pelo endereço indicado. As telas usam dados fictícios.
+
+### Growth OS
+
+Endereço: https://dyegoseabra.com.br/#growth-os
+
+*Projeto 001 · abr–jun 2026 · Customer Analytics para marketing digital*
+
+**Contexto**
+
+Um cliente de Direct Response, com infoprodutos e e-commerce, precisava ligar a receita de cada venda ao gasto de mídia de cada campanha.
+
+**O que eu fiz**
+
+- Pipelines de ingestão em Apache Airflow que trazem a Meta Marketing API e os pagamentos para o PostgreSQL.
+- Carga incremental por watermark e reprocessamento idempotente: rodar de novo não duplica nenhum dado.
+- Modelagem em SQL de RFM, coortes de retenção, LTV e ROAS por campanha.
+- Funil de conversões e atribuição da receita líquida ao gasto de mídia.
+- Dados servidos por uma API em TypeScript para o painel do cliente.
+
+Stack: APACHE AIRFLOW, PYTHON, SQL, POSTGRESQL, META MARKETING API, TYPESCRIPT
+
+Telas:
+- Performance: lucro líquido, ROAS, CAC e LTV do período, a evolução diária de receita, gasto e lucro, e a receita atribuída a cada canal.
+- Reconciliação de receita: cruza a receita reportada pelo Facebook, a atribuída por UTM e a efetivamente paga, e aponta pedidos fantasma e órfãos.
+- Funil do checkout: o caminho real dos compradores, com bump, upsell e o ponto de maior saída.
+- War Room: lucro do dia, feed de vendas e criativos com melhor e pior resultado.
+
+As telas usam dados fictícios gerados pelo próprio sistema.
+
+### Validação de campanhas
+
+Endereço: https://dyegoseabra.com.br/#campanhas
+
+*Projeto 002 · 2025 · Plataforma interna numa operadora de telecom*
+
+**Contexto**
+
+A equipe de marketing cadastrava as campanhas em planilhas de Excel, sem nenhuma validação na entrada.
+
+**O que eu fiz**
+
+- Criei do zero uma plataforma em Python e NiceGUI, empacotada como executável.
+- Integração com o BigQuery pelo Google Cloud SDK: o cadastro já cai na base de dados.
+- Validações na entrada, que barram o erro antes de ele chegar à base.
+
+**Resultado**
+
+- Mais de 500 campanhas cadastradas por semana.
+- 20% menos erros de cadastro.
+- 12 horas por semana liberadas para a equipe.
+
+Stack: PYTHON, NICEGUI, BIGQUERY, GOOGLE CLOUD SDK, SQL
+
+Telas:
+- Consolidados: volume, público alcançado, conversão e campanhas rejeitadas por área.
+- Cadastro da campanha em blocos, com campos obrigatórios e dados do demandante preenchidos automaticamente.
+- Configuração da mensagem com contagem de caracteres e pré-visualização antes de enviar para validação.
+- Templates salvos para reutilizar campanhas recorrentes.
+
+Protótipo da interface em React, com dados fictícios. A versão em uso é em Python e NiceGUI.
+
+### Finanças pessoais
+
+Endereço: https://dyegoseabra.com.br/#financas
+
+*Projeto 003 · 2025 · código aberto · Análise, previsão e segmentação de gastos*
+
+**Contexto**
+
+Estudo de ponta a ponta sobre cerca de 800 transações de um dataset público de exemplo: de onde vem e para onde vai o dinheiro, como o gasto se comporta no tempo e quanto se deve gastar nos próximos meses.
+
+**O que eu fiz**
+
+- Análise exploratória e Pareto por categoria e por conta.
+- Série temporal de gastos, receitas e saldo mensal.
+- Previsão de despesas: um modelo simples primeiro, depois ARIMA/SARIMAX.
+- Segmentação das categorias com K-Means e visualização com PCA, com uma recomendação para cada grupo.
+
+**Resultado**
+
+- Três grupos de gasto com ações diferentes: renegociar os fixos de alto valor, pôr teto nos de estilo de vida e revisar assinaturas recorrentes.
+- Relatório executivo em PDF com as conclusões.
+
+Código: https://github.com/DyegoTkrD/personal-finances
+
+Stack: PYTHON, PANDAS, STATSMODELS, SCIKIT-LEARN, PLOTLY, JUPYTER
+
+Telas:
+- Pareto por categoria: mercado e restaurantes somam 27% dos gastos.
+- Série mensal de transações e gastos, com picos sazonais.
+- Previsão de despesas com ARIMA, que acompanhou bem a série real.
+- Método do cotovelo: quebra a partir de 3 clusters.
+- Clusters de categorias por valor e frequência, visualizados com PCA.
+
+Dataset público de exemplo, sem dados reais.
+
+### Detecção de sonolência
+
+Endereço: https://dyegoseabra.com.br/#sonolencia
+
+*Projeto 004 · 2024 · código aberto · Visão computacional em tempo real*
+
+**Contexto**
+
+Detectar sinais de sonolência pela câmera, em tempo real, com critérios tirados de artigos científicos sobre piscadas e bocejos.
+
+**O que eu fiz**
+
+- Pontos do rosto mapeados com o MediaPipe Face Mesh em cada quadro capturado com OpenCV.
+- Cálculo de EAR (abertura dos olhos) e MAR (abertura da boca) e contagem de piscadas por minuto.
+- Alerta quando o olho fica fechado por mais de 3 segundos ou quando há menos de 15 piscadas por minuto.
+
+Código: https://github.com/DyegoTkrD/Deteccao-Sonolencia
+
+Stack: PYTHON, OPENCV, MEDIAPIPE, NUMPY
+
+Telas:
+- Detecção em tempo real: pontos dos olhos e da boca marcados, EAR, MAR e piscadas por minuto na tela, e o alerta de olhos fechados por muito tempo.
+
+### Gestão para bar
+
+Endereço: https://dyegoseabra.com.br/#bar
+
+*Sistema web / 001 · desde set 2026 · Sistema em produção todas as noites*
+
+**Contexto**
+
+Um bar do qual sou sócio precisava de um sistema único para comandas, caixa e estoque, e de relatórios para decidir preço e compra.
+
+**O que eu fiz**
+
+- Comanda de mesa, venda de balcão, caixa, fiado e tela da cozinha.
+- Estoque com ficha técnica de cada produto.
+- Cardápio público por QR Code e relatórios para decidir preço e compra.
+- App instalável (PWA) no celular do garçom e no tablet da cozinha, servido por uma única aplicação FastAPI.
+
+**Resultado**
+
+- Em operação desde 7 de setembro de 2026, um dia depois do primeiro commit.
+
+Stack: PYTHON, FASTAPI, SQLALCHEMY, POSTGRESQL, REACT, TYPESCRIPT, DOCKER, NGINX
+
+Telas:
+- Resultado: quanto sobra de cada venda depois do estoque e da maquininha, mesa contra balcão e perdas registradas.
+- Produtos: ranking por receita com o acumulado (curva ABC) e quanto cada produto deixa depois do custo.
+- Preços: custo pela ficha técnica, taxa da maquininha e margem de cada produto.
+- Horários: mapa de calor do movimento por dia da semana e hora, com a madrugada contada na noite certa.
+
+Cinco semanas de vendas fictícias geradas para a demonstração; o sistema é usado no celular.
+
+### Nexum Finance
+
+Endereço: https://dyegoseabra.com.br/#nexum
+
+*Aplicação web / 002 · desde jan 2026 · Finanças pessoais com IA*
+
+**Contexto**
+
+Uma aplicação para as minhas finanças: lançamentos, cartões, contas, metas, orçamentos e investimentos, com análise estatística e IA em cima dos dados.
+
+**O que eu fiz**
+
+- A aplicação nasceu no Lovable e no Supabase; migrei tudo para infraestrutura própria.
+- Backend em Fastify com TypeScript e PostgreSQL em Docker, deixando só a autenticação no Supabase.
+- Deploy automático: cada push publica a nova versão pelo GitHub Actions.
+
+Stack: TYPESCRIPT, REACT, FASTIFY, POSTGRESQL, DOCKER, GITHUB ACTIONS
+
+Telas:
+- Visão geral: balanço, receitas e despesas do mês e o score de saúde financeira.
+- Relatório por categoria, com o detalhamento de cada uma.
+- Orçado contra realizado: quais categorias estouraram o orçamento do mês.
+
+Usuário e lançamentos fictícios.
+
+### Agente comercial de WhatsApp
+
+Endereço: https://dyegoseabra.com.br/#agente
+
+*Automação com IA / 003 · set 2025–jun 2026 · Multiagente com LLM*
+
+**Contexto**
+
+Responder leads no WhatsApp rápido e com consistência, e passar a conversa para um humano no momento certo.
+
+**O que eu fiz**
+
+- Um classificador põe cada mensagem numa etapa do funil: nutrição, alto interesse, objeção, agendamento ou encerramento.
+- Lead scoring com saída estruturada em JSON.
+- Um agente auditor revisa cada resposta antes do envio.
+- Agenda reuniões no Google Calendar, transcreve áudio, junta mensagens seguidas e pausa quando um humano assume.
+- Memória da conversa no Redis e estado do lead no PostgreSQL.
+
+Stack: N8N, DEEPSEEK, EVOLUTION API, REDIS, POSTGRESQL, GOOGLE CALENDAR
+
+Telas:
+- Visão geral do fluxo no n8n: entrada, tratamento das mensagens, classificação e agentes por etapa.
+- Roteamento: cada etapa do funil tem o seu agente, com memória e saída estruturada.
+
+## Contato
+
+- [Currículo em português (PDF)](https://dyegoseabra.com.br/assets/Dyego_Seabra_Engenheiro_de_Dados.pdf)
+- [Resume in English (PDF)](https://dyegoseabra.com.br/assets/Dyego_Seabra_Data_Engineer.pdf)
+- [LinkedIn](https://www.linkedin.com/in/dyegoseabradata)
+- [GitHub](https://github.com/DyegoTkrD)
+- E-mail: dyego.tkrd@gmail.com
+- [WhatsApp](https://wa.me/5524999176635)

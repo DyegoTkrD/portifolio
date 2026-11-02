@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://dyegoseabra.com.br/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <priority>1.0</priority>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/og-image.jpg</image:loc></image:image>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/img/growth-os-performance.jpg</image:loc></image:image>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/img/campanhas-consolidados.jpg</image:loc></image:image>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/img/financas-pessoais.jpg</image:loc></image:image>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/img/sonolencia.jpg</image:loc></image:image>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/img/bar-capa.jpg</image:loc></image:image>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/img/nexum-visao-geral.jpg</image:loc></image:image>
+    <image:image><image:loc>https://dyegoseabra.com.br/assets/img/agente-whatsapp.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://dyegoseabra.com.br/assets/Dyego_Seabra_Engenheiro_de_Dados.pdf</loc>
+    <lastmod>2026-11-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://dyegoseabra.com.br/assets/Dyego_Seabra_Data_Engineer.pdf</loc>
+    <lastmod>2026-11-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://dyegoseabra.com.br/llms.txt</loc>
+    <lastmod>2026-11-02</lastmod>
+    <priority>0.4</priority>
+  </url>
+</urlset>
