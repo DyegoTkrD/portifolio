@@ -96,6 +96,13 @@
   .stats div span { font-size: 12px; color: var(--muted); }
   .tags { margin-top: auto; padding-top: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
   .tag { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; border: 1px solid var(--line); padding: 5px 9px; color: var(--muted); }
+  .shot { position: relative; display: block; margin-top: 18px; border: 1px solid var(--line); background: #fff; overflow: hidden; }
+  .shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left; transition: transform .3s; }
+  .shot:hover img { transform: scale(1.02); }
+  .shot.wide { background: #1e1e1e; }
+  .shot.wide img { aspect-ratio: 21 / 9; object-position: center; }
+  .shot.fit img { object-fit: contain; }
+  .badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: var(--accent-ink); font-size: 10px; padding: 4px 8px; }
   .card .repo { margin-top: 18px; color: var(--accent); }
   .card .repo:hover { text-decoration: underline; }
 
@@ -220,6 +227,7 @@
           <div class="num mono"><span class="pt">Projeto</span><span class="en">Project</span> 001 · 2026</div>
           <h3>Growth OS<span class="accent">.</span></h3>
           <div class="sub"><span class="pt">Customer Analytics para marketing digital</span><span class="en">Customer analytics for digital marketing</span></div>
+          <a class="shot" href="assets/img/growth-os.jpg" target="_blank" rel="noopener"><img src="assets/img/growth-os.jpg" alt="Tela de reconciliação de receita do Growth OS" loading="lazy"><span class="badge mono"><span class="pt">Dados fictícios</span><span class="en">Fictitious data</span></span></a>
           <p class="pt">Para um cliente de Direct Response: pipelines em Apache Airflow que trazem a Meta Marketing API e os pagamentos para o PostgreSQL, com carga incremental e reprocessamento idempotente. Em cima disso, modelei em SQL o RFM, as coortes de retenção, o LTV e o ROAS por campanha, com funil de conversões e atribuição da receita ao gasto de mídia.</p>
           <p class="en">For a Direct Response business: Apache Airflow pipelines that bring the Meta Marketing API and payment data into PostgreSQL, with incremental loads and idempotent reprocessing. On top of that, I modeled in SQL the RFM segments, retention cohorts, LTV and ROAS per campaign, with a conversion funnel and attribution of revenue to media spend.</p>
           <div class="tags"><span class="tag">AIRFLOW</span><span class="tag">META MARKETING API</span><span class="tag">POSTGRESQL</span><span class="tag">SQL</span><span class="tag">TYPESCRIPT</span></div>
@@ -243,6 +251,7 @@
           <div class="num mono"><span class="pt">Projeto</span><span class="en">Project</span> 003 · 2025 · <span class="pt">código aberto</span><span class="en">open source</span></div>
           <h3><span class="pt">Finanças pessoais</span><span class="en">Personal finances</span><span class="accent">.</span></h3>
           <div class="sub"><span class="pt">Análise e previsão de despesas</span><span class="en">Spending analysis and forecasting</span></div>
+          <a class="shot fit" href="assets/img/financas-pessoais.jpg" target="_blank" rel="noopener"><img src="assets/img/financas-pessoais.jpg" alt="Previsão de despesas com ARIMA e clusters de categorias com PCA" loading="lazy"></a>
           <p class="pt">Estudo de finanças pessoais com análise exploratória, Pareto por categoria, análise temporal, previsão de despesas com ARIMA e SARIMAX e segmentação de categorias com K-Means e PCA. Termina num relatório executivo em PDF.</p>
           <p class="en">A personal finance study with exploratory analysis, Pareto by category, time-series analysis, spending forecasts with ARIMA and SARIMAX, and category segmentation with K-Means and PCA. It ends in an executive PDF report.</p>
           <div class="tags"><span class="tag">PYTHON</span><span class="tag">PANDAS</span><span class="tag">SARIMAX</span><span class="tag">K-MEANS</span></div>
@@ -325,6 +334,7 @@
             <p class="pt">Bot multiagente que classifica cada mensagem numa etapa do funil, pontua o lead com saída em JSON e responde com um agente por etapa, revisado por um agente auditor antes do envio. Agenda reuniões no Google Calendar e pausa quando um humano assume a conversa.</p>
             <p class="en">A multi-agent bot that classifies each message into a funnel stage, scores the lead with JSON output and replies with one agent per stage, reviewed by an auditor agent before sending. It books meetings in Google Calendar and pauses when a human takes over.</p>
             <div class="tags"><span class="tag">N8N</span><span class="tag">LLM</span><span class="tag">REDIS</span><span class="tag">POSTGRESQL</span></div>
+          <a class="shot wide" href="assets/img/agente-whatsapp.jpg" target="_blank" rel="noopener"><img src="assets/img/agente-whatsapp.jpg" alt="Fluxo do agente no n8n" loading="lazy"></a>
           </div>
         </article>
       </div>
