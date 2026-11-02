@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="pt-BR" data-lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dyego Seabra — Data Engineer</title>
+<meta name="description" content="Portfólio de Dyego Seabra: pipelines de dados, BigQuery, Airflow, automação com Python e sistemas web. Data engineering portfolio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  // Idioma: escolha salva > idioma do navegador > português
+  (function () {
+    var lang = null;
+    try { lang = localStorage.getItem("lang"); } catch (e) {}
+    if (!lang) lang = (navigator.language || "pt").toLowerCase().indexOf("pt") === 0 ? "pt" : "en";
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
+  })();
+</script>
+<style>
+  :root {
+    --bg: #0b0f12;
+    --card: #141b21;
+    --line: #23303a;
+    --text: #e6edf2;
+    --muted: #8b9aa6;
+    --accent: #38d9f5;
+    --accent-ink: #04161b;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --sans: "Space Grotesk", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+  a { color: inherit; text-decoration: none; }
+  html[data-lang="en"] .pt { display: none !important; }
+  html:not([data-lang="en"]) .en { display: none !important; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  .mono { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+  .muted { color: var(--muted); }
+  .accent { color: var(--accent); }
+
+  header { position: sticky; top: 0; z-index: 10; background: rgba(11,15,18,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 36px; height: 36px; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 14px; }
+  .brand b { display: block; font-size: 13px; letter-spacing: .08em; }
+  .brand span { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .14em; }
+  .right { display: flex; align-items: center; gap: 28px; }
+  nav { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
+  nav a:hover { color: var(--text); }
+  .langs { display: flex; border: 1px solid var(--line); }
+  .langs button { background: none; border: 0; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; padding: 6px 9px; cursor: pointer; }
+  .langs button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+  .hero { padding: 88px 0 64px; display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+  .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--accent); margin-bottom: 20px; }
+  .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--accent); flex: none; }
+  h1 { font-size: clamp(44px, 6vw, 72px); line-height: 1.02; letter-spacing: -.02em; font-weight: 700; }
+  .lead { margin-top: 24px; max-width: 520px; color: var(--muted); font-size: 17px; }
+  .cta { margin-top: 36px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .btn { background: var(--accent); color: var(--accent-ink); padding: 14px 22px; font-weight: 500; font-size: 15px; }
+  .btn:hover { filter: brightness(1.1); }
+  .link { color: var(--muted); font-size: 15px; }
+  .link:hover { color: var(--text); }
+
+  .feature { border: 1px solid var(--line); background: linear-gradient(160deg, #10202a, var(--card) 55%); padding: 28px; display: block; }
+  .feature .top { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
+  .pipe { margin: 36px 0 28px; display: grid; gap: 10px; }
+  .node { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); background: rgba(56,217,245,.04); padding: 12px 14px; font-family: var(--mono); font-size: 13px; }
+  .node small { color: var(--muted); font-size: 11px; text-align: right; }
+  .arrow { text-align: center; color: var(--accent); font-family: var(--mono); font-size: 12px; line-height: 1; }
+  .feature h3 { font-size: 44px; line-height: 1; letter-spacing: -.02em; }
+  .feature p { color: var(--muted); margin-top: 8px; }
+  .feature .more { display: inline-block; margin-top: 20px; color: var(--accent); }
+
+  .focus { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .focus .wrap { display: flex; align-items: center; gap: 16px 40px; padding-top: 18px; padding-bottom: 18px; flex-wrap: wrap; }
+  .focus .item { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+  .focus .item::before { content: ""; width: 6px; height: 6px; background: var(--accent); }
+
+  section { padding: 104px 0 0; }
+  .label { color: var(--accent); margin-bottom: 14px; }
+  h2 { font-size: clamp(34px, 4.5vw, 52px); line-height: 1.05; letter-spacing: -.02em; }
+  .intro { color: var(--muted); max-width: 560px; margin-top: 14px; }
+
+  .grid { margin-top: 48px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .card { border: 1px solid var(--line); background: var(--card); padding: 28px; display: flex; flex-direction: column; }
+  .card .num { color: var(--muted); }
+  .card h3 { font-size: 30px; line-height: 1.1; margin: 18px 0 4px; letter-spacing: -.01em; }
+  .card .sub { color: var(--accent); font-size: 15px; }
+  .card p { color: var(--muted); margin-top: 14px; }
+  .stats { display: flex; gap: 28px; margin-top: 20px; flex-wrap: wrap; }
+  .stats div b { display: block; font-size: 26px; }
+  .stats div span { font-size: 12px; color: var(--muted); }
+  .tags { margin-top: auto; padding-top: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; border: 1px solid var(--line); padding: 5px 9px; color: var(--muted); }
+  .card .repo { margin-top: 18px; color: var(--accent); }
+  .card .repo:hover { text-decoration: underline; }
+
+  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 48px; }
+  .about p + p { margin-top: 16px; }
+  .about .who { color: var(--accent); margin: 0 0 16px; }
+  .timeline { list-style: none; border-left: 1px solid var(--line); }
+  .timeline li { padding: 0 0 26px 22px; position: relative; }
+  .timeline li::before { content: ""; position: absolute; left: -4px; top: 6px; width: 7px; height: 7px; background: var(--accent); }
+  .timeline .when { color: var(--accent); }
+  .timeline b { display: block; font-size: 17px; margin-top: 2px; }
+  .timeline span.d { color: var(--muted); font-size: 14px; }
+  .skills { margin-top: 56px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; border-top: 1px solid var(--line); padding-top: 32px; }
+  .skills h4 { margin-bottom: 12px; color: var(--muted); }
+  .skills li { list-style: none; font-family: var(--mono); font-size: 13px; padding: 4px 0; }
+
+  .others { margin-top: 48px; display: grid; gap: 24px; }
+  .row { border: 1px solid var(--line); background: var(--card); padding: 28px; display: grid; grid-template-columns: 220px 1fr; gap: 28px; }
+  .row h3 { font-size: 24px; line-height: 1.15; margin-top: 10px; }
+  .row p { color: var(--muted); }
+
+  .contact { padding-bottom: 104px; }
+  .links { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .pill { border: 1px solid var(--line); padding: 12px 18px; font-size: 15px; }
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+  .pill.solid { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .pill.solid:hover { filter: brightness(1.1); color: var(--accent-ink); }
+  footer { border-top: 1px solid var(--line); padding: 24px 0; color: var(--muted); font-size: 13px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 860px) {
+    nav { display: none; }
+    .hero, .about, .grid { grid-template-columns: 1fr; }
+    .hero { padding-top: 56px; gap: 40px; }
+    .skills { grid-template-columns: repeat(2, 1fr); }
+    .row { grid-template-columns: 1fr; gap: 12px; }
+    section { padding-top: 80px; }
+  }
+  @media (max-width: 420px) {
+    .wrap { padding: 0 16px; }
+    .skills { grid-template-columns: 1fr; }
+    .feature h3 { font-size: 36px; }
+    .brand b { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#inicio">
+      <div class="logo">DS.</div>
+      <div><b>DYEGO SEABRA</b><span>DATA ENGINEER</span></div>
+    </a>
+    <div class="right">
+      <nav>
+        <a href="#inicio"><span class="pt">Início</span><span class="en">Home</span></a>
+        <a href="#projetos"><span class="pt">Projetos</span><span class="en">Projects</span></a>
+        <a href="#sobre"><span class="pt">Sobre</span><span class="en">About</span></a>
+        <a href="#outros"><span class="pt">Outros trabalhos</span><span class="en">Other work</span></a>
+        <a href="#contato"><span class="pt">Contato</span><span class="en">Contact</span></a>
+      </nav>
+      <div class="langs" role="group" aria-label="Idioma / Language">
+        <button type="button" data-set="pt">PT</button>
+        <button type="button" data-set="en">EN</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero" id="inicio">
+    <div>
+      <div class="eyebrow mono"><span class="pt">Portfólio de engenharia de dados</span><span class="en">Data engineering portfolio</span></div>
+      <h1 class="pt">Dados que viram <span class="accent">decisão.</span></h1>
+      <h1 class="en">Data that turns into <span class="accent">decisions.</span></h1>
+      <p class="lead pt">Sou Dyego Seabra, analista de dados sênior em transição para engenharia de dados. Construo pipelines, plataformas e automações que tiram o trabalho manual do caminho e deixam o número certo na mão de quem decide.</p>
+      <p class="lead en">I'm Dyego Seabra, a senior data analyst moving into data engineering. I build pipelines, platforms and automations that take manual work out of the way and put the right number in the hands of whoever makes the call.</p>
+      <div class="cta">
+        <a class="btn" href="#projetos"><span class="pt">Explorar projetos</span><span class="en">Explore projects</span></a>
+        <a class="link" href="#sobre"><span class="pt">Um pouco sobre mim →</span><span class="en">A bit about me →</span></a>
+      </div>
+    </div>
+
+    <a class="feature" href="#projetos">
+      <div class="top mono"><span><span class="pt">Projeto em destaque</span><span class="en">Featured project</span></span><span>001 / Pipelines</span></div>
+      <div class="pipe" aria-hidden="true">
+        <div class="node"><span>Meta Marketing API + <span class="pt">pagamentos</span><span class="en">payments</span></span> <small><span class="pt">fonte</span><span class="en">source</span></small></div>
+        <div class="arrow">↓</div>
+        <div class="node">Apache Airflow <small><span class="pt">carga incremental</span><span class="en">incremental load</span></small></div>
+        <div class="arrow">↓</div>
+        <div class="node">PostgreSQL + SQL <small>RFM · LTV · ROAS</small></div>
+        <div class="arrow">↓</div>
+        <div class="node">API TypeScript <small><span class="pt">painel do cliente</span><span class="en">client dashboard</span></small></div>
+      </div>
+      <div class="mono accent">Airflow · PostgreSQL</div>
+      <h3>GROWTH OS<span class="accent">.</span></h3>
+      <p><span class="pt">Ingestão · Modelagem · Atribuição</span><span class="en">Ingestion · Modeling · Attribution</span></p>
+      <span class="more mono"><span class="pt">Conhecer projeto ↗</span><span class="en">See project ↗</span></span>
+    </a>
+  </div>
+
+  <div class="focus">
+    <div class="wrap">
+      <span class="mono muted"><span class="pt">Foco técnico</span><span class="en">Technical focus</span></span>
+      <span class="item"><span class="pt">Python e SQL</span><span class="en">Python and SQL</span></span>
+      <span class="item">BigQuery (Google Cloud)</span>
+      <span class="item">Apache Airflow</span>
+      <span class="item"><span class="pt">Modelagem de dados</span><span class="en">Data modeling</span></span>
+    </div>
+  </div>
+
+  <section id="projetos">
+    <div class="wrap">
+      <div class="label mono"><span class="pt">01 / Projetos</span><span class="en">01 / Projects</span></div>
+      <h2><span class="pt">Projetos em destaque.</span><span class="en">Featured projects.</span></h2>
+      <p class="intro pt">Pipelines e plataformas de dados que construí para resolver problemas reais de marketing e operação.</p>
+      <p class="intro en">Data pipelines and platforms I built to solve real marketing and operations problems.</p>
+
+      <div class="grid">
+        <article class="card">
+          <div class="num mono"><span class="pt">Projeto</span><span class="en">Project</span> 001 · 2026</div>
+          <h3>Growth OS<span class="accent">.</span></h3>
+          <div class="sub"><span class="pt">Customer Analytics para marketing digital</span><span class="en">Customer analytics for digital marketing</span></div>
+          <p class="pt">Para um cliente de Direct Response: pipelines em Apache Airflow que trazem a Meta Marketing API e os pagamentos para o PostgreSQL, com carga incremental e reprocessamento idempotente. Em cima disso, modelei em SQL o RFM, as coortes de retenção, o LTV e o ROAS por campanha, com funil de conversões e atribuição da receita ao gasto de mídia.</p>
+          <p class="en">For a Direct Response business: Apache Airflow pipelines that bring the Meta Marketing API and payment data into PostgreSQL, with incremental loads and idempotent reprocessing. On top of that, I modeled in SQL the RFM segments, retention cohorts, LTV and ROAS per campaign, with a conversion funnel and attribution of revenue to media spend.</p>
+          <div class="tags"><span class="tag">AIRFLOW</span><span class="tag">META MARKETING API</span><span class="tag">POSTGRESQL</span><span class="tag">SQL</span><span class="tag">TYPESCRIPT</span></div>
+        </article>
+
+        <article class="card">
+          <div class="num mono"><span class="pt">Projeto</span><span class="en">Project</span> 002 · 2025</div>
+          <h3><span class="pt">Validação de campanhas</span><span class="en">Campaign validation</span><span class="accent">.</span></h3>
+          <div class="sub"><span class="pt">Plataforma interna numa operadora de telecom</span><span class="en">Internal platform at a telecom company</span></div>
+          <p class="pt">Criei do zero uma plataforma em Python e NiceGUI, empacotada como executável e integrada ao BigQuery, onde a equipe cadastra as campanhas de marketing. As validações na entrada substituíram as planilhas de Excel.</p>
+          <p class="en">I built from scratch a Python and NiceGUI platform, packaged as an executable and integrated with BigQuery, where the team registers its marketing campaigns. Validation at the point of entry replaced the Excel spreadsheets.</p>
+          <div class="stats">
+            <div><b>+500</b><span><span class="pt">campanhas por semana</span><span class="en">campaigns a week</span></span></div>
+            <div><b>−20%</b><span><span class="pt">erros de cadastro</span><span class="en">data-entry errors</span></span></div>
+            <div><b>12 h</b><span><span class="pt">por semana liberadas</span><span class="en">saved every week</span></span></div>
+          </div>
+          <div class="tags"><span class="tag">PYTHON</span><span class="tag">NICEGUI</span><span class="tag">BIGQUERY</span><span class="tag">GOOGLE CLOUD</span></div>
+        </article>
+
+        <article class="card">
+          <div class="num mono"><span class="pt">Projeto</span><span class="en">Project</span> 003 · 2025 · <span class="pt">código aberto</span><span class="en">open source</span></div>
+          <h3><span class="pt">Finanças pessoais</span><span class="en">Personal finances</span><span class="accent">.</span></h3>
+          <div class="sub"><span class="pt">Análise e previsão de despesas</span><span class="en">Spending analysis and forecasting</span></div>
+          <p class="pt">Estudo de finanças pessoais com análise exploratória, Pareto por categoria, análise temporal, previsão de despesas com ARIMA e SARIMAX e segmentação de categorias com K-Means e PCA. Termina num relatório executivo em PDF.</p>
+          <p class="en">A personal finance study with exploratory analysis, Pareto by category, time-series analysis, spending forecasts with ARIMA and SARIMAX, and category segmentation with K-Means and PCA. It ends in an executive PDF report.</p>
+          <div class="tags"><span class="tag">PYTHON</span><span class="tag">PANDAS</span><span class="tag">SARIMAX</span><span class="tag">K-MEANS</span></div>
+          <a class="repo mono" href="https://github.com/DyegoTkrD/personal-finances" target="_blank" rel="noopener"><span class="pt">Ver no GitHub ↗</span><span class="en">View on GitHub ↗</span></a>
+        </article>
+
+        <article class="card">
+          <div class="num mono"><span class="pt">Projeto</span><span class="en">Project</span> 004 · 2024 · <span class="pt">código aberto</span><span class="en">open source</span></div>
+          <h3><span class="pt">Detecção de sonolência</span><span class="en">Drowsiness detection</span><span class="accent">.</span></h3>
+          <div class="sub"><span class="pt">Visão computacional em tempo real</span><span class="en">Real-time computer vision</span></div>
+          <p class="pt">Detecta sonolência pela câmera com OpenCV e MediaPipe: mede a abertura dos olhos (EAR) e da boca (MAR) e conta as piscadas por minuto. Sinaliza olho fechado por mais de 3 segundos ou menos de 15 piscadas por minuto, critérios tirados de artigos sobre o tema.</p>
+          <p class="en">Detects drowsiness from a camera with OpenCV and MediaPipe: it measures eye (EAR) and mouth (MAR) aspect ratios and counts blinks per minute. It flags eyes closed for more than 3 seconds or fewer than 15 blinks a minute, criteria taken from research papers.</p>
+          <div class="tags"><span class="tag">PYTHON</span><span class="tag">OPENCV</span><span class="tag">MEDIAPIPE</span><span class="tag">NUMPY</span></div>
+          <a class="repo mono" href="https://github.com/DyegoTkrD/Deteccao-Sonolencia" target="_blank" rel="noopener"><span class="pt">Ver no GitHub ↗</span><span class="en">View on GitHub ↗</span></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="sobre">
+    <div class="wrap">
+      <div class="label mono"><span class="pt">02 / Sobre</span><span class="en">02 / About</span></div>
+      <h2 class="pt">Entender.<br>Construir.<br>Automatizar<span class="accent">.</span></h2>
+      <h2 class="en">Understand.<br>Build.<br>Automate<span class="accent">.</span></h2>
+
+      <div class="about">
+        <div>
+          <div class="who mono"><span class="pt">Dyego Seabra · Analista de dados sênior</span><span class="en">Dyego Seabra · Senior data analyst</span></div>
+          <p class="pt">Trabalho com dados há 4 anos. Hoje sou analista de dados sênior numa operadora de telecom, com bases de bilhões de linhas por mês no BigQuery, e estou direcionando a carreira para engenharia de dados.</p>
+          <p class="en">I've worked with data for 4 years. Today I'm a senior data analyst at a telecom company, working with billions of rows per month in BigQuery, and I'm steering my career toward data engineering.</p>
+          <p class="pt">Comecei no suporte técnico de uma provedora de internet e virei o único analista de dados da empresa, atendendo cinco áreas ao mesmo tempo. Isso me ensinou a entender o problema antes de escolher a ferramenta. Hoje também oriento um analista júnior, com divisão de tarefas e code review.</p>
+          <p class="en">I started in technical support at an internet provider and became the company's only data analyst, serving five departments at once. That taught me to understand the problem before picking the tool. Today I also mentor a junior analyst, splitting tasks and doing code review.</p>
+        </div>
+
+        <ul class="timeline">
+          <li><div class="when mono"><span class="pt">2025 – hoje</span><span class="en">2025 – now</span></div><b><span class="pt">Analista de Dados Sênior</span><span class="en">Senior Data Analyst</span></b><span class="d pt">Operadora de telecom · Pipelines de carga e validação no BigQuery, plataforma de campanhas e orientação de um júnior</span><span class="d en">Telecom company · Load and validation pipelines in BigQuery, campaign platform and mentoring a junior analyst</span></li>
+          <li><div class="when mono">2024 – 2025</div><b><span class="pt">Analista de Dados Pleno</span><span class="en">Data Analyst</span></b><span class="d pt">Operadora de telecom · Validador para 20+ planilhas e automações em Python que liberaram 8 h por semana</span><span class="d en">Telecom company · Validator for 20+ spreadsheets and Python automations that saved 8 hours a week</span></li>
+          <li><div class="when mono">2023 – 2024</div><b><span class="pt">Analista de BI</span><span class="en">BI Analyst</span></b><span class="d pt">Operadora de telecom · Cerca de 10 dashboards em Power BI e automação em VBA de 60 documentos por mês</span><span class="d en">Telecom company · About 10 Power BI dashboards and VBA automation of 60 documents a month</span></li>
+          <li><div class="when mono">2022 – 2023</div><b><span class="pt">Analista de BI</span><span class="en">BI Analyst</span></b><span class="d pt">Provedora de internet · Único analista de dados, 30+ dashboards e um modelo de churn em Python</span><span class="d en">Internet provider · Only data analyst, 30+ dashboards and a churn model in Python</span></li>
+          <li><div class="when mono">2020 – 2025</div><b><span class="pt">Bacharelado em Ciência da Computação</span><span class="en">B.Sc. in Computer Science</span></b><span class="d pt">Universidade Estácio de Sá · Concluído em 2025</span><span class="d en">Estácio de Sá University · Graduated in 2025</span></li>
+        </ul>
+      </div>
+
+      <div class="skills">
+        <div><h4 class="mono"><span class="pt">Dados</span><span class="en">Data</span></h4><ul><li>Python</li><li>SQL</li><li>BigQuery</li><li>Apache Airflow</li><li>PostgreSQL</li><li>ETL</li><li><span class="pt">Modelagem de dados</span><span class="en">Data modeling</span></li></ul></div>
+        <div><h4 class="mono">BI</h4><ul><li>Power BI</li><li>Looker Studio</li><li>Metabase</li><li><span class="pt">Excel e VBA</span><span class="en">Excel and VBA</span></li></ul></div>
+        <div><h4 class="mono">Software</h4><ul><li>FastAPI</li><li>TypeScript</li><li>Docker</li><li><span class="pt">Git e CI/CD</span><span class="en">Git and CI/CD</span></li><li>Linux</li><li><span class="pt">LLMs e agentes (n8n)</span><span class="en">LLMs and agents (n8n)</span></li></ul></div>
+        <div><h4 class="mono"><span class="pt">Idiomas</span><span class="en">Languages</span></h4><ul><li><span class="pt">Português · nativo</span><span class="en">Portuguese · native</span></li><li><span class="pt">Inglês · intermediário</span><span class="en">English · intermediate</span></li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="outros">
+    <div class="wrap">
+      <div class="label mono"><span class="pt">03 / Outros trabalhos</span><span class="en">03 / Other work</span></div>
+      <h2><span class="pt">Além dos dados.</span><span class="en">Beyond data.</span></h2>
+      <p class="intro pt">Sistemas e aplicações que construí de ponta a ponta, do banco ao deploy.</p>
+      <p class="intro en">Systems and applications I built end to end, from the database to deployment.</p>
+
+      <div class="others">
+        <article class="row">
+          <div><div class="mono muted"><span class="pt">Sistema web</span><span class="en">Web system</span> / 001</div><h3><span class="pt">Gestão para bar</span><span class="en">Bar management</span></h3></div>
+          <div>
+            <p class="pt">Sistema em produção todas as noites desde setembro de 2026: comanda de mesa, balcão, caixa, estoque com ficha técnica, fiado, tela da cozinha, cardápio por QR Code e relatórios para decidir preço e compra. Roda como app no celular do garçom e no tablet da cozinha.</p>
+            <p class="en">In production every night since September 2026: table orders, counter sales, cashier, stock with recipe cards, customer tabs, a kitchen screen, a QR-code menu and reports to decide prices and purchases. It runs as an app on the waiter's phone and the kitchen tablet.</p>
+            <div class="tags"><span class="tag">PYTHON</span><span class="tag">FASTAPI</span><span class="tag">POSTGRESQL</span><span class="tag">REACT</span><span class="tag">DOCKER</span></div>
+          </div>
+        </article>
+        <article class="row">
+          <div><div class="mono muted"><span class="pt">Aplicação web</span><span class="en">Web app</span> / 002</div><h3>Nexum Finance</h3></div>
+          <div>
+            <p class="pt">Finanças pessoais com lançamentos, cartões, metas, orçamentos e análise com IA. Migrei a aplicação do Lovable e do Supabase para infraestrutura própria, com backend em Fastify, PostgreSQL em Docker e deploy automático pelo GitHub Actions.</p>
+            <p class="en">Personal finance with transactions, credit cards, goals, budgets and AI analysis. I migrated the app from Lovable and Supabase to my own infrastructure, with a Fastify backend, PostgreSQL in Docker and automatic deploys through GitHub Actions.</p>
+            <div class="tags"><span class="tag">TYPESCRIPT</span><span class="tag">FASTIFY</span><span class="tag">REACT</span><span class="tag">POSTGRESQL</span><span class="tag">GITHUB ACTIONS</span></div>
+          </div>
+        </article>
+        <article class="row">
+          <div><div class="mono muted"><span class="pt">Automação com IA</span><span class="en">AI automation</span> / 003</div><h3><span class="pt">Agente comercial de WhatsApp</span><span class="en">WhatsApp sales agent</span></h3></div>
+          <div>
+            <p class="pt">Bot multiagente que classifica cada mensagem numa etapa do funil, pontua o lead com saída em JSON e responde com um agente por etapa, revisado por um agente auditor antes do envio. Agenda reuniões no Google Calendar e pausa quando um humano assume a conversa.</p>
+            <p class="en">A multi-agent bot that classifies each message into a funnel stage, scores the lead with JSON output and replies with one agent per stage, reviewed by an auditor agent before sending. It books meetings in Google Calendar and pauses when a human takes over.</p>
+            <div class="tags"><span class="tag">N8N</span><span class="tag">LLM</span><span class="tag">REDIS</span><span class="tag">POSTGRESQL</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato" class="contact">
+    <div class="wrap">
+      <div class="label mono"><span class="pt">04 / Contato</span><span class="en">04 / Contact</span></div>
+      <h2><span class="pt">Vamos conversar</span><span class="en">Let's talk</span><span class="accent">?</span></h2>
+      <p class="intro pt">Quer falar sobre um projeto ou uma oportunidade? Me chama por aqui.</p>
+      <p class="intro en">Want to talk about a project or an opportunity? Reach out here.</p>
+      <div class="links">
+        <a class="pill solid pt" href="assets/Dyego_Seabra_Engenheiro_de_Dados.pdf" download>Baixar currículo ↓</a>
+        <a class="pill solid en" href="assets/Dyego_Seabra_Data_Engineer.pdf" download>Download resume ↓</a>
+        <a class="pill" href="https://www.linkedin.com/in/dyegoseabradata" target="_blank" rel="noopener">LinkedIn ↗</a>
+        <a class="pill" href="https://github.com/DyegoTkrD" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="pill" href="mailto:dyego.tkrd@gmail.com">dyego.tkrd@gmail.com →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Dyego Seabra</span>
+    <span class="mono"><span class="pt">Angra dos Reis, RJ · Remoto</span><span class="en">Angra dos Reis, Brazil · Remote</span></span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var buttons = document.querySelectorAll(".langs button");
+    function apply(lang) {
+      root.setAttribute("data-lang", lang);
+      root.lang = lang === "en" ? "en" : "pt-BR";
+      buttons.forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.set === lang)); });
+      try { localStorage.setItem("lang", lang); } catch (e) {}
+    }
+    buttons.forEach(function (b) { b.addEventListener("click", function () { apply(b.dataset.set); }); });
+    apply(root.getAttribute("data-lang") || "pt");
+  })();
+</script>
+</body>
+</html>
