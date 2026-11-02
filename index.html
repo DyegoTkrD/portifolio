@@ -54,7 +54,7 @@
   .langs button { background: none; border: 0; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; padding: 6px 9px; cursor: pointer; }
   .langs button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
-  .hero { padding: 88px 0 64px; display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+  .hero { padding-top: 88px; padding-bottom: 64px; display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
   .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--accent); margin-bottom: 20px; }
   .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--accent); flex: none; }
   h1 { font-size: clamp(44px, 6vw, 72px); line-height: 1.02; letter-spacing: -.02em; font-weight: 700; }
@@ -178,11 +178,103 @@
     .feature h3 { font-size: 36px; }
     .brand b { font-size: 12px; }
   }
+  /* ===== Camada de movimento (componentes adaptados do 21st.dev, sem dependências) ===== */
+  main { position: relative; }
+  /* Fundo do topo: grade técnica + aurora (Background Paths / Aurora) */
+  .hero-bg { position: absolute; inset: 0 0 auto 0; height: 860px; overflow: hidden; pointer-events: none; z-index: 0; }
+  .hero-bg::before { content: ""; position: absolute; inset: 0;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 56px 56px; opacity: .35;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+            mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%); }
+  .hero-bg .aurora { position: absolute; width: 760px; height: 760px; left: 50%; top: -220px; translate: -50% 0; border-radius: 50%;
+    background: radial-gradient(circle at 30% 40%, rgba(56,217,245,.22), transparent 55%), radial-gradient(circle at 70% 60%, rgba(64,120,255,.16), transparent 55%);
+    filter: blur(40px); animation: aurora 18s ease-in-out infinite alternate; }
+  .hero-bg .beam { position: absolute; top: 0; width: 1px; height: 180px; background: linear-gradient(to bottom, transparent, var(--accent), transparent); opacity: 0; animation: beam 7s linear infinite; }
+  .hero-bg .beam:nth-child(2) { left: 18%; animation-delay: 0s; }
+  .hero-bg .beam:nth-child(3) { left: 46%; animation-delay: 2.4s; }
+  .hero-bg .beam:nth-child(4) { left: 74%; animation-delay: 4.6s; }
+  .hero-bg .beam:nth-child(5) { left: 90%; animation-delay: 1.3s; }
+  @keyframes aurora { 0% { transform: translate(-80px, 0) scale(1); } 100% { transform: translate(120px, 60px) scale(1.15); } }
+  @keyframes beam { 0% { transform: translateY(-200px); opacity: 0; } 10% { opacity: .55; } 70% { opacity: .55; } 100% { transform: translateY(820px); opacity: 0; } }
+  .hero, .focus { position: relative; z-index: 1; }
+
+  /* Texto rotativo estilo terminal (Text Rotate) */
+  .term { margin-top: 22px; color: var(--muted); display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: .04em; font-size: 13px; min-height: 20px; }
+  .term .prompt { color: var(--accent); }
+  .term .rot { color: var(--text); }
+  .term .caret { width: 8px; height: 16px; background: var(--accent); animation: caret 1s steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+
+  /* Pipeline "rodando" no card de destaque */
+  .flow { position: relative; height: 18px; width: 1px; margin: 0 auto; background: repeating-linear-gradient(to bottom, var(--line) 0 3px, transparent 3px 6px); }
+  .flow i { position: absolute; left: -3px; top: -4px; width: 7px; height: 7px; background: var(--accent); box-shadow: 0 0 10px var(--accent); opacity: 0; animation: packet 3.6s linear infinite; }
+  .pipe > :nth-child(4) i { animation-delay: 1.2s; }
+  .pipe > :nth-child(6) i { animation-delay: 2.4s; }
+  .pipe .node { animation: nodeglow 3.6s ease-out infinite; }
+  .pipe > :nth-child(3) { animation-delay: 1.1s; }
+  .pipe > :nth-child(5) { animation-delay: 2.3s; }
+  .pipe > :nth-child(7) { animation-delay: 3.5s; }
+  @keyframes packet { 0% { top: -4px; opacity: 0; } 4% { opacity: 1; } 30% { top: 16px; opacity: 1; } 34%, 100% { top: 16px; opacity: 0; } }
+  @keyframes nodeglow { 0% { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,217,245,.25), 0 0 18px rgba(56,217,245,.12); } 30%, 100% { border-color: var(--line); box-shadow: none; } }
+  .live { display: inline-flex; align-items: center; gap: 7px; }
+  .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 0 0 rgba(61,220,132,.6); animation: ping 2s infinite; }
+  @keyframes ping { 70% { box-shadow: 0 0 0 7px rgba(61,220,132,0); } 100% { box-shadow: 0 0 0 0 rgba(61,220,132,0); } }
+
+  /* Faixa de tecnologias em loop (Infinite Slider) */
+  .focus .wrap { flex-wrap: nowrap; }
+  .marquee { flex: 1; overflow: hidden; min-width: 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .marquee .track { display: flex; gap: 40px; width: max-content; animation: marquee 38s linear infinite; }
+  .marquee:hover .track { animation-play-state: paused; }
+  .marquee .item { white-space: nowrap; }
+  @keyframes marquee { to { transform: translateX(calc(-50% - 20px)); } }
+
+  /* Brilho que segue o mouse (Spotlight Card) */
+  .spot { position: relative; isolation: isolate; }
+  .spot::after { content: ""; position: absolute; inset: -1px; pointer-events: none; z-index: -1; opacity: 0; transition: opacity .3s;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(56,217,245,.10), transparent 45%); }
+  .spot::before { content: ""; position: absolute; inset: -1px; pointer-events: none; opacity: 0; transition: opacity .3s; padding: 1px;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(56,217,245,.75), transparent 60%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+  .spot:hover::after, .spot:hover::before { opacity: 1; }
+  .card, .row { transition: transform .3s, border-color .3s; }
+  .card:hover, .row:hover { transform: translateY(-3px); }
+
+  /* Botões com brilho que atravessa (Shiny Button) */
+  .btn, .pill.solid { position: relative; overflow: hidden; }
+  .btn::after, .pill.solid::after { content: ""; position: absolute; inset: 0; translate: -120% 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); transition: translate .7s; }
+  .btn:hover::after, .pill.solid:hover::after { translate: 120% 0; }
+  .btn .arr { display: inline-block; margin-left: 8px; transition: transform .25s; }
+  .btn:hover .arr { transform: translateX(4px); }
+
+  /* Barra de leitura e item ativo do menu */
+  .progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); box-shadow: 0 0 8px var(--accent); }
+  nav a { position: relative; transition: color .2s; }
+  nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: var(--accent); transform: scaleX(0); transition: transform .3s; }
+  nav a.on { color: var(--text); }
+  nav a.on::after { transform: scaleX(1); }
+
+  /* Entrada ao rolar */
+  .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; transition-delay: var(--d, 0s); }
+  .js .reveal.in { opacity: 1; transform: none; }
+  .js .card.reveal.in:hover, .js .row.reveal.in:hover { transform: translateY(-3px); transition-delay: 0s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-bg .aurora, .hero-bg .beam, .flow i, .pipe .node, .marquee .track, .term .caret, .live::before { animation: none !important; }
+    .hero-bg .beam, .flow i { display: none; }
+    .js .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+  @media (max-width: 860px) { .hero-bg { height: 1100px; } .marquee .track { gap: 28px; } }
 </style>
 </head>
 <body>
 
 <header>
+  <div class="progress" aria-hidden="true"></div>
   <div class="wrap">
     <a class="brand" href="#inicio">
       <div class="logo">DS.</div>
@@ -205,6 +297,7 @@
 </header>
 
 <main>
+  <div class="hero-bg" aria-hidden="true"><span class="aurora"></span><span class="beam"></span><span class="beam"></span><span class="beam"></span><span class="beam"></span></div>
   <div class="wrap hero" id="inicio">
     <div>
       <div class="eyebrow mono"><span class="pt">Portfólio de engenharia de dados</span><span class="en">Data engineering portfolio</span></div>
@@ -212,21 +305,22 @@
       <h1 class="en">Data that turns into <span class="accent">decisions.</span></h1>
       <p class="lead pt">Sou Dyego Seabra, analista de dados sênior em transição para engenharia de dados. Construo pipelines, plataformas e automações que tiram o trabalho manual do caminho e deixam o número certo na mão de quem decide.</p>
       <p class="lead en">I'm Dyego Seabra, a senior data analyst moving into data engineering. I build pipelines, platforms and automations that take manual work out of the way and put the right number in the hands of whoever makes the call.</p>
+      <div class="term mono" aria-hidden="true"><span class="prompt">$</span><span class="pt">construindo</span><span class="en">building</span><span class="rot" data-pt="pipelines de dados|modelos em SQL|cargas incrementais|automações em Python|dashboards" data-en="data pipelines|SQL models|incremental loads|Python automations|dashboards">pipelines</span><span class="caret"></span></div>
       <div class="cta">
-        <a class="btn" href="#projetos"><span class="pt">Explorar projetos</span><span class="en">Explore projects</span></a>
+        <a class="btn" href="#projetos"><span class="pt">Explorar projetos</span><span class="en">Explore projects</span><span class="arr">→</span></a>
         <a class="link" href="#sobre"><span class="pt">Um pouco sobre mim →</span><span class="en">A bit about me →</span></a>
       </div>
     </div>
 
     <a class="feature" href="#projetos">
-      <div class="top mono"><span><span class="pt">Projeto em destaque</span><span class="en">Featured project</span></span><span>001 / Pipelines</span></div>
+      <div class="top mono"><span><span class="pt">Projeto em destaque</span><span class="en">Featured project</span></span><span class="live">001 / Pipelines</span></div>
       <div class="pipe" aria-hidden="true">
         <div class="node"><span>Meta Marketing API + <span class="pt">pagamentos</span><span class="en">payments</span></span> <small><span class="pt">fonte</span><span class="en">source</span></small></div>
-        <div class="arrow">↓</div>
+        <div class="flow"><i></i></div>
         <div class="node">Apache Airflow <small><span class="pt">carga incremental</span><span class="en">incremental load</span></small></div>
-        <div class="arrow">↓</div>
+        <div class="flow"><i></i></div>
         <div class="node">PostgreSQL + SQL <small>RFM · LTV · ROAS</small></div>
-        <div class="arrow">↓</div>
+        <div class="flow"><i></i></div>
         <div class="node">API TypeScript <small><span class="pt">painel do cliente</span><span class="en">client dashboard</span></small></div>
       </div>
       <div class="mono accent">Airflow · PostgreSQL</div>
@@ -238,11 +332,8 @@
 
   <div class="focus">
     <div class="wrap">
-      <span class="mono muted"><span class="pt">Foco técnico</span><span class="en">Technical focus</span></span>
-      <span class="item"><span class="pt">Python e SQL</span><span class="en">Python and SQL</span></span>
-      <span class="item">BigQuery (Google Cloud)</span>
-      <span class="item">Apache Airflow</span>
-      <span class="item"><span class="pt">Modelagem de dados</span><span class="en">Data modeling</span></span>
+      <span class="mono muted" style="flex:none"><span class="pt">Foco técnico</span><span class="en">Technical focus</span></span>
+      <div class="marquee"><div class="track"><span class="item">Python</span><span class="item">SQL</span><span class="item">BigQuery</span><span class="item">Apache Airflow</span><span class="item">PostgreSQL</span><span class="item"><span class="pt">Modelagem de dados</span><span class="en">Data modeling</span></span><span class="item">ETL / ELT</span><span class="item">Docker</span><span class="item">FastAPI</span><span class="item">Power BI</span><span class="item">Looker Studio</span><span class="item">n8n</span><span class="item">Git</span><span class="item">Linux</span><span aria-hidden="true" style="display:contents"><span class="item">Python</span><span class="item">SQL</span><span class="item">BigQuery</span><span class="item">Apache Airflow</span><span class="item">PostgreSQL</span><span class="item"><span class="pt">Modelagem de dados</span><span class="en">Data modeling</span></span><span class="item">ETL / ELT</span><span class="item">Docker</span><span class="item">FastAPI</span><span class="item">Power BI</span><span class="item">Looker Studio</span><span class="item">n8n</span><span class="item">Git</span><span class="item">Linux</span></span></div></div>
     </div>
   </div>
 
@@ -425,6 +516,90 @@
   })();
 </script>
 
+<script>
+  // Camada de movimento: tudo opcional; sem JS o site aparece inteiro e parado
+  (function () {
+    var root = document.documentElement;
+    var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    root.classList.add("js");
+
+    // Entrada ao rolar, em cascata dentro de cada grupo
+    var groups = [".grid > .card", ".others > .row", ".timeline li", ".skills > div", "section h2", "section .intro", ".links .pill"];
+    var els = [];
+    groups.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el, i) { el.classList.add("reveal"); el.style.setProperty("--d", (i % 4) * 0.08 + "s"); els.push(el); });
+    });
+    if ("IntersectionObserver" in window && !calm) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+      }, { rootMargin: "0px 0px -8% 0px" });
+      els.forEach(function (el) { io.observe(el); });
+    } else { els.forEach(function (el) { el.classList.add("in"); }); }
+
+    // Brilho que segue o mouse
+    document.querySelectorAll(".card, .row, .feature").forEach(function (el) {
+      el.classList.add("spot");
+      el.addEventListener("pointermove", function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty("--mx", (e.clientX - r.left) + "px");
+        el.style.setProperty("--my", (e.clientY - r.top) + "px");
+      });
+    });
+
+    // Números que contam até o valor
+    function countUp(el) {
+      var txt = el.textContent, m = txt.match(/\d+/);
+      if (!m || calm) return;
+      var end = +m[0], t0 = null, pre = txt.slice(0, m.index), post = txt.slice(m.index + m[0].length);
+      function step(t) {
+        if (!t0) t0 = t;
+        var k = Math.min((t - t0) / 1200, 1), v = Math.round(end * (1 - Math.pow(1 - k, 3)));
+        el.textContent = pre + v + post;
+        if (k < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    if ("IntersectionObserver" in window) {
+      var so = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { countUp(e.target); so.unobserve(e.target); } });
+      }, { threshold: 0.6 });
+      document.querySelectorAll(".stats b").forEach(function (b) { so.observe(b); });
+    }
+
+    // Texto rotativo do terminal, digitado e apagado
+    var rot = document.querySelector(".term .rot");
+    if (rot && !calm) {
+      var i = 0, pos = 0, del = false, words = [];
+      function list() { return (rot.dataset[root.getAttribute("data-lang") === "en" ? "en" : "pt"] || "").split("|"); }
+      (function tick() {
+        words = list(); var w = words[i % words.length];
+        if (!del) { pos++; if (pos > w.length) { del = true; return setTimeout(tick, 1600); } }
+        else { pos--; if (pos === 0) { del = false; i++; } }
+        rot.textContent = w.slice(0, pos);
+        setTimeout(tick, del ? 35 : 70);
+      })();
+    } else if (rot) { rot.textContent = rot.dataset[root.getAttribute("data-lang") === "en" ? "en" : "pt"].split("|")[0]; }
+
+    // Barra de leitura e item ativo do menu
+    var bar = document.querySelector(".progress");
+    function onScroll() {
+      var h = document.documentElement.scrollHeight - innerHeight;
+      if (bar) bar.style.transform = "scaleX(" + (h > 0 ? scrollY / h : 0) + ")";
+    }
+    addEventListener("scroll", onScroll, { passive: true }); onScroll();
+    var links = {};
+    document.querySelectorAll("nav a").forEach(function (a) { links[a.getAttribute("href").slice(1)] = a; });
+    if ("IntersectionObserver" in window) {
+      var no = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          Object.keys(links).forEach(function (k) { links[k].classList.toggle("on", k === e.target.id); });
+        });
+      }, { rootMargin: "-45% 0px -50% 0px" });
+      Object.keys(links).forEach(function (k) { var sec = document.getElementById(k); if (sec) no.observe(sec); });
+    }
+  })();
+</script>
 <script>
   // Painel de detalhes: abre pelo botão, pela imagem do card ou pelo endereço (#growth-os)
   (function () {
