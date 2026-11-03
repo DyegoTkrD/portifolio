@@ -233,6 +233,216 @@ Telas:
 - Visão geral do fluxo no n8n: entrada, tratamento das mensagens, classificação e agentes por etapa.
 - Roteamento: cada etapa do funil tem o seu agente, com memória e saída estruturada.
 
+## Artigos
+
+Textos técnicos de Dyego, em português. O código dos exemplos é genérico, escrito para os artigos.
+
+### ROAS sobre receita líquida e carga idempotente no Airflow
+
+Endereço: https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/ · publicado em 2026-11-02
+
+Calcular ROAS sobre a receita líquida parece uma decisão de negócio. Na prática, ela decide o desenho do pipeline: a receita líquida muda depois da venda, então a carga precisa reler o passado sem duplicar nada.
+
+De abril a junho de 2026, construí o Growth OS, uma plataforma de Customer Analytics para um cliente de Direct Response. A pergunta que ela precisava responder era simples: essa campanha deu lucro? Os dados para responder estavam em dois lugares que não conversavam: o gateway de pagamento de um lado, a mídia paga do Meta Ads do outro.
+
+Este texto é sobre duas decisões desse projeto que se puxam uma à outra: medir o ROAS sobre a receita líquida e, por causa disso, fazer a ingestão incremental por watermark com reprocessamento idempotente. O código no meio do texto é um exemplo genérico, escrito para este artigo, e não o código do cliente.
+
+#### O número do painel de anúncios não é o número do caixa
+
+ROAS é receita atribuída dividida pelo gasto de mídia. A pergunta que importa é qual receita. O painel de anúncios mostra o valor das conversões que a própria plataforma registrou. É o número mais fácil de pegar, e é o mais otimista.
+
+Entre a conversão que o pixel registra e o dinheiro que fica na empresa existe um caminho: o boleto ou o PIX gerado que nunca foi pago, o reembolso, o chargeback. Uma campanha pode parecer ótima pela receita bruta e ser só razoável pela receita que ficou.
+
+No Growth OS, o ROAS por campanha e por anúncio cruza o gasto de mídia, que vem da Meta Marketing API, com a receita líquida real, que vem dos pagamentos. Não com a receita que o painel de anúncios reporta.
+
+#### A receita líquida muda depois da venda
+
+Aqui a decisão de negócio vira problema de engenharia. Um pedido criado no dia 1 pode ser pago no dia 3 e reembolsado no dia 20. Se o pipeline carrega cada pagamento uma vez só, pela data de criação, o reembolso do dia 20 nunca chega ao banco, e o ROAS daquela campanha fica inflado para sempre.
+
+Isso leva a três escolhas:
+
+1. Carga incremental pela data de atualização, não pela de criação. O que interessa é "o que mudou desde a última carga".
+2. Uma janela de lookback: cada execução relê alguns dias antes do watermark, para pegar o que a fonte atualizou com atraso.
+3. Escrita idempotente: se cada execução relê dados que já foram carregados, a mesma linha chega várias vezes. Gravar de novo tem de dar o mesmo resultado, nunca uma linha a mais.
+
+#### Watermark: onde a última carga parou
+
+Watermark é a marca do último dado carregado. A próxima carga começa dali. No exemplo, ela fica numa tabela de controle no próprio banco, uma linha por fonte:
+
+```
+CREATE TABLE controle.carga (
+    fonte     text PRIMARY KEY,
+    watermark timestamptz NOT NULL
+);
+INSERT INTO controle.carga VALUES ('pagamentos', '2026-01-01');
+```
+
+Guardar o watermark no destino, e não numa Variable do Airflow ou num arquivo, tem uma vantagem: ele pode ser atualizado na mesma transação que grava os dados. Ou os dois mudam, ou nenhum muda. Se a carga cai no meio, o watermark não avança, e a próxima execução refaz o trecho.
+
+#### A DAG
+
+Uma DAG de pagamentos incremental e idempotente, com Airflow e PostgreSQL. A função buscar_pagamentos representa o cliente da API do gateway (paginação, autenticação e retry ficam lá dentro) e devolve uma lista de dicionários com atualizado_em já como datetime.
+
+```
+from datetime import datetime, timedelta
+
+from airflow.decorators import dag, task
+from airflow.models.param import Param
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from psycopg2.extras import execute_values
+
+from fontes.gateway import buscar_pagamentos
+
+FONTE = "pagamentos"
+LOOKBACK = timedelta(days=3)  # relê os últimos dias: reembolso e status mudam depois
+
+UPSERT = """
+    INSERT INTO bronze.pagamentos
+        (pagamento_id, pedido_id, status, valor, valor_reembolsado, atualizado_em)
+    VALUES %s
+    ON CONFLICT (pagamento_id) DO UPDATE SET
+        status            = EXCLUDED.status,
+        valor             = EXCLUDED.valor,
+        valor_reembolsado = EXCLUDED.valor_reembolsado,
+        atualizado_em     = EXCLUDED.atualizado_em
+    WHERE bronze.pagamentos.atualizado_em <= EXCLUDED.atualizado_em
+"""
+
+
+@dag(
+    schedule="@hourly",
+    start_date=datetime(2026, 1, 1),
+    catchup=False,
+    max_active_runs=1,  # duas execuções ao mesmo tempo disputariam o watermark
+    default_args={"retries": 3, "retry_delay": timedelta(minutes=5)},
+    params={"desde": Param(None, type=["null", "string"])},  # reprocessamento manual
+)
+def pagamentos_incremental():
+
+    @task
+    def inicio_da_janela(**context) -> str:
+        desde = context["params"]["desde"]
+        if desde:
+            return desde
+        hook = PostgresHook(postgres_conn_id="dw")
+        (watermark,) = hook.get_first(
+            "SELECT watermark FROM controle.carga WHERE fonte = %s", parameters=(FONTE,)
+        )
+        return (watermark - LOOKBACK).isoformat()
+
+    @task
+    def carregar(desde: str) -> int:
+        # a API pode devolver o mesmo pagamento duas vezes; fica a versão mais nova
+        mais_recente = {}
+        for r in buscar_pagamentos(atualizados_desde=desde):
+            atual = mais_recente.get(r["id"])
+            if atual is None or r["atualizado_em"] >= atual["atualizado_em"]:
+                mais_recente[r["id"]] = r
+        if not mais_recente:
+            return 0
+
+        linhas = [
+            (r["id"], r["pedido_id"], r["status"], r["valor"],
+             r["valor_reembolsado"], r["atualizado_em"])
+            for r in mais_recente.values()
+        ]
+        novo_watermark = max(r["atualizado_em"] for r in mais_recente.values())
+
+        conn = PostgresHook(postgres_conn_id="dw").get_conn()
+        try:
+            with conn, conn.cursor() as cur:  # uma transação: dados e watermark juntos
+                execute_values(cur, UPSERT, linhas)
+                cur.execute(
+                    "UPDATE controle.carga SET watermark = GREATEST(watermark, %s) WHERE fonte = %s",
+                    (novo_watermark, FONTE),
+                )
+        finally:
+            conn.close()
+        return len(linhas)
+
+    carregar(inicio_da_janela())
+
+
+pagamentos_incremental()
+```
+
+##### O que cada detalhe garante
+
+- ON CONFLICT (pagamento_id) DO UPDATE: a chave natural do pagamento decide se a linha é nova ou atualização. Um INSERT puro, rodado duas vezes, grava a venda duas vezes. O upsert, rodado duas vezes, deixa a tabela igual. É isso que idempotência quer dizer: executar de novo dá o mesmo resultado.
+- O WHERE do upsert: só sobrescreve se a versão que chegou é igual ou mais nova que a gravada. Uma execução atrasada ou um retry fora de ordem não troca um reembolso por um "pago" antigo.
+- A deduplicação antes de gravar: o PostgreSQL recusa um ON CONFLICT DO UPDATE que toca a mesma chave duas vezes no mesmo comando. Se a paginação da API repetir um registro, a carga quebraria sem ela.
+- GREATEST no watermark: um reprocessamento de uma semana antiga não faz o watermark andar para trás.
+- Mesma transação: o with conn do psycopg2 faz commit no fim do bloco e rollback se algo falhar. Dado gravado sem watermark atualizado, ou o contrário, não acontece.
+- max_active_runs=1 e catchup=False: a janela vem do watermark, não da data lógica da execução, então não há por que o Airflow disparar as horas perdidas. Uma execução cobre o atraso inteiro.
+
+> Reprocessar uma semana sem medo. Para reler um período, basta disparar a DAG com o parâmetro desde, por exemplo {"desde": "2026-05-01T00:00:00+00:00"}. Tudo o que já estava no banco é sobrescrito com a versão atual da fonte, nada é duplicado, e o watermark fica onde estava.
+>
+> Idempotência não é detalhe de engenharia. É o que deixa você reprocessar uma semana inteira sem medo de duplicar venda.
+
+##### O preço do lookback
+
+A janela de lookback é um palpite sobre quanto tempo a fonte leva para atualizar um registro. Três dias pegam a maior parte das mudanças de status, mas um reembolso pedido trinta dias depois fica de fora. As saídas são uma janela maior (mais leitura por execução), uma carga diária com janela longa ao lado da carga horária com janela curta, ou um reprocessamento mensal pelo parâmetro desde. Como a escrita é idempotente, as três convivem sem conflito.
+
+#### O ROAS em SQL
+
+Com os pagamentos atualizados, o ROAS sobre a receita líquida sai de uma consulta. O cuidado é o grain: o gasto tem uma linha por campanha por dia, os pedidos têm uma linha por pedido. Juntar as duas tabelas antes de agregar repete a receita de cada pedido em cada dia de gasto da campanha. Por isso, agrega-se cada lado primeiro, e só depois se junta:
+
+```
+WITH gasto AS (
+    SELECT campanha_id, SUM(valor) AS gasto
+    FROM silver.gasto_midia_diario
+    WHERE dia >= '2026-05-01' AND dia < '2026-06-01'
+    GROUP BY campanha_id
+),
+receita AS (
+    SELECT p.campanha_id, SUM(pg.valor - pg.valor_reembolsado) AS receita_liquida
+    FROM silver.pedidos p
+    JOIN bronze.pagamentos pg ON pg.pedido_id = p.pedido_id
+    WHERE pg.status IN ('pago', 'reembolsado')  -- boleto e PIX não pagos ficam fora
+      AND p.criado_em >= '2026-05-01' AND p.criado_em < '2026-06-01'
+    GROUP BY p.campanha_id
+)
+SELECT
+    g.campanha_id,
+    g.gasto,
+    COALESCE(r.receita_liquida, 0) AS receita_liquida,
+    ROUND(COALESCE(r.receita_liquida, 0) / NULLIF(g.gasto, 0), 2) AS roas
+FROM gasto g
+LEFT JOIN receita r USING (campanha_id)
+ORDER BY roas DESC NULLS LAST;
+```
+
+O LEFT JOIN parte do gasto para a campanha que gastou e não vendeu aparecer com ROAS zero, em vez de sumir do relatório. O NULLIF evita a divisão por zero. E a receita é atribuída pela data do pedido, não pela do reembolso: o reembolso do dia 20 corrige o ROAS do mês em que a venda aconteceu.
+
+#### Duas conferências antes de confiar no número
+
+Um pipeline idempotente ainda precisa provar que é. Depois de cada carga, ou num teste agendado, duas consultas bastam para pegar a maior parte dos problemas:
+
+```
+-- 1. Nenhuma chave duplicada (precisa voltar vazio)
+SELECT pagamento_id, COUNT(*)
+FROM bronze.pagamentos
+GROUP BY pagamento_id
+HAVING COUNT(*) > 1;
+
+-- 2. A receita do relatório bate com a da tabela no mesmo período
+SELECT SUM(pg.valor - pg.valor_reembolsado)
+FROM silver.pedidos p
+JOIN bronze.pagamentos pg ON pg.pedido_id = p.pedido_id
+WHERE pg.status IN ('pago', 'reembolsado')
+  AND p.criado_em >= '2026-05-01' AND p.criado_em < '2026-06-01';
+```
+
+Com a chave primária em pagamento_id, a primeira volta vazia por construção; ela vale para tabelas em que a chave não é garantida pelo banco. A segunda pega o erro clássico do join: se a soma do relatório passa da soma da tabela, alguma linha foi multiplicada. Se fica abaixo, a soma da tabela inclui pedido de campanha sem gasto no período, o que também merece um olhar.
+
+#### O que eu levo para qualquer pipeline
+
+1. Pergunte qual número o negócio vai usar antes de desenhar a carga. "ROAS sobre receita líquida" decidiu a coluna do watermark, a janela de lookback e a escrita por upsert.
+2. Escreva toda carga como se ela fosse rodar duas vezes. Porque vai: retry, falha no meio, reprocessamento, alguém clicando em "Clear" na interface do Airflow.
+3. Watermark e dados mudam juntos. Se não estão na mesma transação, existe um instante em que o banco mente sobre o que já foi carregado.
+
+O Growth OS também tem modelagem em SQL de RFM, coortes de retenção e LTV, e uma API em TypeScript que serve tudo isso ao painel do cliente. Os detalhes e as telas, com dados fictícios, estão na página do projeto.
+
 ## Contato
 
 - [Currículo em português (PDF)](https://dyegoseabra.com.br/assets/Dyego_Seabra_Engenheiro_de_Dados.pdf)

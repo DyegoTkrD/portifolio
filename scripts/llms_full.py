@@ -1,5 +1,5 @@
-"""Gera llms-full.txt a partir do index.html do portfólio (texto em português)."""
-import re, sys
+"""Gera llms-full.txt a partir do index.html e dos artigos do portfólio (texto em português)."""
+import glob, re, sys
 from bs4 import BeautifulSoup
 
 site = sys.argv[1]
@@ -14,7 +14,7 @@ def pt(el):
     el = BeautifulSoup(str(el), "html.parser")
     for e in el.select(".en"):
         e.decompose()
-    return re.sub(r"\s+", " ", el.get_text(" ")).replace(" .", ".").replace(" ,", ",").strip()
+    return re.sub(r"\s+", " ", el.get_text(" ")).replace(" .", ".").replace(" ,", ",").replace(" :", ":").replace(" ;", ";").replace("( ", "(").replace(" )", ")").strip()
 
 out = []
 summary = open(f"{site}/llms.txt", encoding="utf-8").read().split("\n## ")[0]
@@ -63,6 +63,30 @@ for tpl in soup.select("template[id^=p-]"):
     if note:
         block.append(pt(note))
     out.append("\n\n".join(block))
+
+def md(el):
+    """Bloco do corpo do artigo em Markdown, com títulos abaixo do ### do artigo."""
+    if el.name in ("h2", "h3"):
+        return "#" * (int(el.name[1]) + 2) + " " + pt(el)
+    if el.name == "pre":
+        return "```\n" + el.get_text().strip("\n") + "\n```"
+    if el.name in ("ul", "ol"):
+        return "\n".join(("- " if el.name == "ul" else f"{i}. ") + pt(li) for i, li in enumerate(el.select("li"), 1))
+    if "callout" in (el.get("class") or []):
+        return "\n>\n".join("> " + pt(p) for p in el.select("p"))
+    return pt(el)
+
+arts = []
+for f in glob.glob(f"{site}/artigos/*/index.html"):
+    a = BeautifulSoup(open(f, encoding="utf-8").read(), "html.parser")
+    url = a.select_one("link[rel=canonical]")["href"]
+    data = a.select_one('meta[property="article:published_time"]')["content"]
+    block = [f"### {pt(a.select_one('h1')).rstrip('.')}", f"Endereço: {url} · publicado em {data}", pt(a.select_one(".lede"))]
+    block += [md(el) for el in a.select_one(".prose").find_all(recursive=False)]
+    arts.append((data, "\n\n".join(block)))
+if arts:
+    out.append("## Artigos\n\nTextos técnicos de Dyego, em português. O código dos exemplos é genérico, escrito para os artigos.")
+    out += [b for _, b in sorted(arts, reverse=True)]
 
 out.append("## Contato\n\n" + open(f"{site}/llms.txt", encoding="utf-8").read().split("## Currículo e contato\n")[1].split("\n## ")[0].strip())
 open(f"{site}/llms-full.txt", "w", encoding="utf-8").write("\n\n".join(out) + "\n")

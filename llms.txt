@@ -27,6 +27,12 @@ Este arquivo resume o portfólio para assistentes de IA. A versão completa, com
 - [Nexum Finance](https://dyegoseabra.com.br/#nexum): finanças pessoais com IA, migrada para infraestrutura própria (Fastify, PostgreSQL, GitHub Actions)
 - [Agente comercial de WhatsApp](https://dyegoseabra.com.br/#agente): bot multiagente com LLM no n8n, com lead scoring e agente auditor
 
+## Artigos
+
+Textos técnicos de Dyego sobre engenharia de dados, em português, com exemplos de código genéricos. Índice em [dyegoseabra.com.br/artigos/](https://dyegoseabra.com.br/artigos/); o texto completo de cada um está também no llms-full.txt.
+
+- [ROAS sobre receita líquida e carga idempotente no Airflow](https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/) (2026-11-02): por que medir ROAS sobre a receita líquida muda o desenho do pipeline; carga incremental por watermark com janela de lookback, upsert idempotente no PostgreSQL, DAG de exemplo e o SQL do ROAS
+
 ## Currículo e contato
 
 - [Currículo em português (PDF)](https://dyegoseabra.com.br/assets/Dyego_Seabra_Engenheiro_de_Dados.pdf)

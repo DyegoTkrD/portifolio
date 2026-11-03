@@ -14,6 +14,16 @@
     <image:image><image:loc>https://dyegoseabra.com.br/assets/img/agente-whatsapp.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://dyegoseabra.com.br/artigos/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://dyegoseabra.com.br/assets/Dyego_Seabra_Engenheiro_de_Dados.pdf</loc>
     <lastmod>2026-11-02</lastmod>
     <priority>0.6</priority>

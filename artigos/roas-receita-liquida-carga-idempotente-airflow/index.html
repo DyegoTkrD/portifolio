@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROAS sobre receita líquida e carga idempotente no Airflow | Dyego Seabra</title>
+<meta name="description" content="Por que calcular ROAS sobre a receita líquida muda o desenho do pipeline: carga incremental por watermark, janela de lookback e upsert idempotente no Airflow e no PostgreSQL, com código de exemplo.">
+<meta name="author" content="Dyego Seabra">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0b0f12">
+<link rel="canonical" href="https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Dyego Seabra">
+<meta property="og:url" content="https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/">
+<meta property="og:title" content="ROAS sobre receita líquida e carga idempotente no Airflow">
+<meta property="og:description" content="Receita líquida muda depois da venda. O pipeline precisa reler o passado sem duplicar nada: watermark, lookback e upsert, com código.">
+<meta property="og:image" content="https://dyegoseabra.com.br/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Dyego Seabra, Engenheiro de Dados: dados que viram decisão.">
+<meta property="og:locale" content="pt_BR">
+<meta property="article:published_time" content="2026-11-02">
+<meta property="article:author" content="https://dyegoseabra.com.br/">
+<meta property="article:tag" content="Apache Airflow">
+<meta property="article:tag" content="Engenharia de dados">
+<meta property="article:tag" content="ROAS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ROAS sobre receita líquida e carga idempotente no Airflow">
+<meta name="twitter:description" content="Receita líquida muda depois da venda. O pipeline precisa reler o passado sem duplicar nada.">
+<meta name="twitter:image" content="https://dyegoseabra.com.br/assets/og-image.jpg">
+
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "BlogPosting",
+   "@id": "https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/#artigo",
+   "mainEntityOfPage": "https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/",
+   "url": "https://dyegoseabra.com.br/artigos/roas-receita-liquida-carga-idempotente-airflow/",
+   "headline": "ROAS sobre receita líquida e carga idempotente no Airflow",
+   "description": "Por que calcular ROAS sobre a receita líquida muda o desenho do pipeline: carga incremental por watermark, janela de lookback e upsert idempotente no Airflow e no PostgreSQL, com código de exemplo.",
+   "image": "https://dyegoseabra.com.br/assets/og-image.jpg",
+   "datePublished": "2026-11-02",
+   "dateModified": "2026-11-02",
+   "inLanguage": "pt-BR",
+   "author": { "@id": "https://dyegoseabra.com.br/#dyego" },
+   "publisher": { "@id": "https://dyegoseabra.com.br/#dyego" },
+   "isPartOf": { "@id": "https://dyegoseabra.com.br/artigos/#blog" },
+   "about": { "@id": "https://dyegoseabra.com.br/#growth-os" },
+   "keywords": "Apache Airflow, carga incremental, watermark, idempotência, upsert, PostgreSQL, ROAS, receita líquida, engenharia de dados"
+  },
+  {
+   "@type": "Person",
+   "@id": "https://dyegoseabra.com.br/#dyego",
+   "name": "Dyego Seabra",
+   "url": "https://dyegoseabra.com.br/"
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Início", "item": "https://dyegoseabra.com.br/" },
+    { "@type": "ListItem", "position": 2, "name": "Artigos", "item": "https://dyegoseabra.com.br/artigos/" },
+    { "@type": "ListItem", "position": 3, "name": "ROAS sobre receita líquida e carga idempotente no Airflow" }
+   ]
+  }
+ ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/artigos.css">
+</head>
+<body>
+
+<header>
+  <div class="progress" aria-hidden="true"></div>
+  <div class="wrap">
+    <a class="brand" href="/">
+      <div class="logo">DS.</div>
+      <div><b>DYEGO SEABRA</b><span>DATA ENGINEER</span></div>
+    </a>
+    <nav>
+      <a href="/#projetos">Projetos</a>
+      <a href="/artigos/" class="on">Artigos</a>
+      <a href="/#contato">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<article class="post-page">
+  <div class="wrap">
+    <div class="crumb mono"><a href="/artigos/">Artigos</a> / Engenharia de dados</div>
+    <h1>ROAS sobre receita líquida e carga idempotente no <span class="accent">Airflow.</span></h1>
+    <div class="meta mono">
+      <span>Dyego Seabra</span>
+      <time datetime="2026-11-02">2 nov 2026</time>
+      <span>8 min de leitura</span>
+    </div>
+
+    <p class="lede">Calcular ROAS sobre a receita líquida parece uma decisão de negócio. Na prática, ela decide o desenho do pipeline: a receita líquida muda depois da venda, então a carga precisa reler o passado sem duplicar nada.</p>
+
+    <div class="prose">
+      <p>De abril a junho de 2026, construí o <a href="/#growth-os">Growth OS</a>, uma plataforma de Customer Analytics para um cliente de Direct Response. A pergunta que ela precisava responder era simples: <strong>essa campanha deu lucro?</strong> Os dados para responder estavam em dois lugares que não conversavam: o gateway de pagamento de um lado, a mídia paga do Meta Ads do outro.</p>
+      <p>Este texto é sobre duas decisões desse projeto que se puxam uma à outra: medir o ROAS sobre a receita líquida e, por causa disso, fazer a ingestão incremental por watermark com reprocessamento idempotente. O código no meio do texto é um exemplo genérico, escrito para este artigo, e não o código do cliente.</p>
+
+      <h2>O número do painel de anúncios não é o número do caixa</h2>
+      <p>ROAS é receita atribuída dividida pelo gasto de mídia. A pergunta que importa é <em>qual receita</em>. O painel de anúncios mostra o valor das conversões que a própria plataforma registrou. É o número mais fácil de pegar, e é o mais otimista.</p>
+      <p>Entre a conversão que o pixel registra e o dinheiro que fica na empresa existe um caminho: o boleto ou o PIX gerado que nunca foi pago, o reembolso, o chargeback. Uma campanha pode parecer ótima pela receita bruta e ser só razoável pela receita que ficou.</p>
+      <p>No Growth OS, o ROAS por campanha e por anúncio cruza o gasto de mídia, que vem da Meta Marketing API, com a <strong>receita líquida real</strong>, que vem dos pagamentos. Não com a receita que o painel de anúncios reporta.</p>
+
+      <h2>A receita líquida muda depois da venda</h2>
+      <p>Aqui a decisão de negócio vira problema de engenharia. Um pedido criado no dia 1 pode ser pago no dia 3 e reembolsado no dia 20. Se o pipeline carrega cada pagamento uma vez só, pela data de criação, o reembolso do dia 20 nunca chega ao banco, e o ROAS daquela campanha fica inflado para sempre.</p>
+      <p>Isso leva a três escolhas:</p>
+      <ol>
+        <li><strong>Carga incremental pela data de atualização</strong>, não pela de criação. O que interessa é "o que mudou desde a última carga".</li>
+        <li><strong>Uma janela de lookback</strong>: cada execução relê alguns dias antes do watermark, para pegar o que a fonte atualizou com atraso.</li>
+        <li><strong>Escrita idempotente</strong>: se cada execução relê dados que já foram carregados, a mesma linha chega várias vezes. Gravar de novo tem de dar o mesmo resultado, nunca uma linha a mais.</li>
+      </ol>
+
+      <h2>Watermark: onde a última carga parou</h2>
+      <p>Watermark é a marca do último dado carregado. A próxima carga começa dali. No exemplo, ela fica numa tabela de controle no próprio banco, uma linha por fonte:</p>
+<pre><code><span class="k">CREATE TABLE</span> controle.carga (
+    fonte     text <span class="k">PRIMARY KEY</span>,
+    watermark timestamptz <span class="k">NOT NULL</span>
+);
+<span class="k">INSERT INTO</span> controle.carga <span class="k">VALUES</span> (<span class="s">'pagamentos'</span>, <span class="s">'2026-01-01'</span>);</code></pre>
+      <p>Guardar o watermark no destino, e não numa Variable do Airflow ou num arquivo, tem uma vantagem: ele pode ser atualizado <strong>na mesma transação</strong> que grava os dados. Ou os dois mudam, ou nenhum muda. Se a carga cai no meio, o watermark não avança, e a próxima execução refaz o trecho.</p>
+
+      <h2>A DAG</h2>
+      <p>Uma DAG de pagamentos incremental e idempotente, com Airflow e PostgreSQL. A função <code>buscar_pagamentos</code> representa o cliente da API do gateway (paginação, autenticação e retry ficam lá dentro) e devolve uma lista de dicionários com <code>atualizado_em</code> já como <code>datetime</code>.</p>
+<pre><code><span class="k">from</span> datetime <span class="k">import</span> datetime, timedelta
+
+<span class="k">from</span> airflow.decorators <span class="k">import</span> dag, task
+<span class="k">from</span> airflow.models.param <span class="k">import</span> Param
+<span class="k">from</span> airflow.providers.postgres.hooks.postgres <span class="k">import</span> PostgresHook
+<span class="k">from</span> psycopg2.extras <span class="k">import</span> execute_values
+
+<span class="k">from</span> fontes.gateway <span class="k">import</span> buscar_pagamentos
+
+FONTE = <span class="s">"pagamentos"</span>
+LOOKBACK = timedelta(days=<span class="s">3</span>)  <span class="c"># relê os últimos dias: reembolso e status mudam depois</span>
+
+UPSERT = <span class="s">"""
+    INSERT INTO bronze.pagamentos
+        (pagamento_id, pedido_id, status, valor, valor_reembolsado, atualizado_em)
+    VALUES %s
+    ON CONFLICT (pagamento_id) DO UPDATE SET
+        status            = EXCLUDED.status,
+        valor             = EXCLUDED.valor,
+        valor_reembolsado = EXCLUDED.valor_reembolsado,
+        atualizado_em     = EXCLUDED.atualizado_em
+    WHERE bronze.pagamentos.atualizado_em &lt;= EXCLUDED.atualizado_em
+"""</span>
+
+
+<span class="k">@dag</span>(
+    schedule=<span class="s">"@hourly"</span>,
+    start_date=datetime(<span class="s">2026</span>, <span class="s">1</span>, <span class="s">1</span>),
+    catchup=<span class="k">False</span>,
+    max_active_runs=<span class="s">1</span>,  <span class="c"># duas execuções ao mesmo tempo disputariam o watermark</span>
+    default_args={<span class="s">"retries"</span>: <span class="s">3</span>, <span class="s">"retry_delay"</span>: timedelta(minutes=<span class="s">5</span>)},
+    params={<span class="s">"desde"</span>: Param(<span class="k">None</span>, type=[<span class="s">"null"</span>, <span class="s">"string"</span>])},  <span class="c"># reprocessamento manual</span>
+)
+<span class="k">def</span> pagamentos_incremental():
+
+    <span class="k">@task</span>
+    <span class="k">def</span> inicio_da_janela(**context) -&gt; str:
+        desde = context[<span class="s">"params"</span>][<span class="s">"desde"</span>]
+        <span class="k">if</span> desde:
+            <span class="k">return</span> desde
+        hook = PostgresHook(postgres_conn_id=<span class="s">"dw"</span>)
+        (watermark,) = hook.get_first(
+            <span class="s">"SELECT watermark FROM controle.carga WHERE fonte = %s"</span>, parameters=(FONTE,)
+        )
+        <span class="k">return</span> (watermark - LOOKBACK).isoformat()
+
+    <span class="k">@task</span>
+    <span class="k">def</span> carregar(desde: str) -&gt; int:
+        <span class="c"># a API pode devolver o mesmo pagamento duas vezes; fica a versão mais nova</span>
+        mais_recente = {}
+        <span class="k">for</span> r <span class="k">in</span> buscar_pagamentos(atualizados_desde=desde):
+            atual = mais_recente.get(r[<span class="s">"id"</span>])
+            <span class="k">if</span> atual <span class="k">is None or</span> r[<span class="s">"atualizado_em"</span>] &gt;= atual[<span class="s">"atualizado_em"</span>]:
+                mais_recente[r[<span class="s">"id"</span>]] = r
+        <span class="k">if not</span> mais_recente:
+            <span class="k">return</span> <span class="s">0</span>
+
+        linhas = [
+            (r[<span class="s">"id"</span>], r[<span class="s">"pedido_id"</span>], r[<span class="s">"status"</span>], r[<span class="s">"valor"</span>],
+             r[<span class="s">"valor_reembolsado"</span>], r[<span class="s">"atualizado_em"</span>])
+            <span class="k">for</span> r <span class="k">in</span> mais_recente.values()
+        ]
+        novo_watermark = max(r[<span class="s">"atualizado_em"</span>] <span class="k">for</span> r <span class="k">in</span> mais_recente.values())
+
+        conn = PostgresHook(postgres_conn_id=<span class="s">"dw"</span>).get_conn()
+        <span class="k">try</span>:
+            <span class="k">with</span> conn, conn.cursor() <span class="k">as</span> cur:  <span class="c"># uma transação: dados e watermark juntos</span>
+                execute_values(cur, UPSERT, linhas)
+                cur.execute(
+                    <span class="s">"UPDATE controle.carga SET watermark = GREATEST(watermark, %s) WHERE fonte = %s"</span>,
+                    (novo_watermark, FONTE),
+                )
+        <span class="k">finally</span>:
+            conn.close()
+        <span class="k">return</span> len(linhas)
+
+    carregar(inicio_da_janela())
+
+
+pagamentos_incremental()</code></pre>
+
+      <h3>O que cada detalhe garante</h3>
+      <ul>
+        <li><strong><code>ON CONFLICT (pagamento_id) DO UPDATE</code></strong>: a chave natural do pagamento decide se a linha é nova ou atualização. Um <code>INSERT</code> puro, rodado duas vezes, grava a venda duas vezes. O upsert, rodado duas vezes, deixa a tabela igual. É isso que idempotência quer dizer: executar de novo dá o mesmo resultado.</li>
+        <li><strong>O <code>WHERE</code> do upsert</strong>: só sobrescreve se a versão que chegou é igual ou mais nova que a gravada. Uma execução atrasada ou um retry fora de ordem não troca um reembolso por um "pago" antigo.</li>
+        <li><strong>A deduplicação antes de gravar</strong>: o PostgreSQL recusa um <code>ON CONFLICT DO UPDATE</code> que toca a mesma chave duas vezes no mesmo comando. Se a paginação da API repetir um registro, a carga quebraria sem ela.</li>
+        <li><strong><code>GREATEST</code> no watermark</strong>: um reprocessamento de uma semana antiga não faz o watermark andar para trás.</li>
+        <li><strong>Mesma transação</strong>: o <code>with conn</code> do psycopg2 faz commit no fim do bloco e rollback se algo falhar. Dado gravado sem watermark atualizado, ou o contrário, não acontece.</li>
+        <li><strong><code>max_active_runs=1</code> e <code>catchup=False</code></strong>: a janela vem do watermark, não da data lógica da execução, então não há por que o Airflow disparar as horas perdidas. Uma execução cobre o atraso inteiro.</li>
+      </ul>
+
+      <div class="callout">
+        <p><strong>Reprocessar uma semana sem medo.</strong> Para reler um período, basta disparar a DAG com o parâmetro <code>desde</code>, por exemplo <code>{"desde": "2026-05-01T00:00:00+00:00"}</code>. Tudo o que já estava no banco é sobrescrito com a versão atual da fonte, nada é duplicado, e o watermark fica onde estava.</p>
+        <p>Idempotência não é detalhe de engenharia. É o que deixa você reprocessar uma semana inteira sem medo de duplicar venda.</p>
+      </div>
+
+      <h3>O preço do lookback</h3>
+      <p>A janela de lookback é um palpite sobre quanto tempo a fonte leva para atualizar um registro. Três dias pegam a maior parte das mudanças de status, mas um reembolso pedido trinta dias depois fica de fora. As saídas são uma janela maior (mais leitura por execução), uma carga diária com janela longa ao lado da carga horária com janela curta, ou um reprocessamento mensal pelo parâmetro <code>desde</code>. Como a escrita é idempotente, as três convivem sem conflito.</p>
+
+      <h2>O ROAS em SQL</h2>
+      <p>Com os pagamentos atualizados, o ROAS sobre a receita líquida sai de uma consulta. O cuidado é o grain: o gasto tem uma linha por campanha por dia, os pedidos têm uma linha por pedido. Juntar as duas tabelas antes de agregar repete a receita de cada pedido em cada dia de gasto da campanha. Por isso, agrega-se cada lado primeiro, e só depois se junta:</p>
+<pre><code><span class="k">WITH</span> gasto <span class="k">AS</span> (
+    <span class="k">SELECT</span> campanha_id, <span class="k">SUM</span>(valor) <span class="k">AS</span> gasto
+    <span class="k">FROM</span> silver.gasto_midia_diario
+    <span class="k">WHERE</span> dia &gt;= <span class="s">'2026-05-01'</span> <span class="k">AND</span> dia &lt; <span class="s">'2026-06-01'</span>
+    <span class="k">GROUP BY</span> campanha_id
+),
+receita <span class="k">AS</span> (
+    <span class="k">SELECT</span> p.campanha_id, <span class="k">SUM</span>(pg.valor - pg.valor_reembolsado) <span class="k">AS</span> receita_liquida
+    <span class="k">FROM</span> silver.pedidos p
+    <span class="k">JOIN</span> bronze.pagamentos pg <span class="k">ON</span> pg.pedido_id = p.pedido_id
+    <span class="k">WHERE</span> pg.status <span class="k">IN</span> (<span class="s">'pago'</span>, <span class="s">'reembolsado'</span>)  <span class="c">-- boleto e PIX não pagos ficam fora</span>
+      <span class="k">AND</span> p.criado_em &gt;= <span class="s">'2026-05-01'</span> <span class="k">AND</span> p.criado_em &lt; <span class="s">'2026-06-01'</span>
+    <span class="k">GROUP BY</span> p.campanha_id
+)
+<span class="k">SELECT</span>
+    g.campanha_id,
+    g.gasto,
+    <span class="k">COALESCE</span>(r.receita_liquida, <span class="s">0</span>) <span class="k">AS</span> receita_liquida,
+    <span class="k">ROUND</span>(<span class="k">COALESCE</span>(r.receita_liquida, <span class="s">0</span>) / <span class="k">NULLIF</span>(g.gasto, <span class="s">0</span>), <span class="s">2</span>) <span class="k">AS</span> roas
+<span class="k">FROM</span> gasto g
+<span class="k">LEFT JOIN</span> receita r <span class="k">USING</span> (campanha_id)
+<span class="k">ORDER BY</span> roas <span class="k">DESC NULLS LAST</span>;</code></pre>
+      <p>O <code>LEFT JOIN</code> parte do gasto para a campanha que gastou e não vendeu aparecer com ROAS zero, em vez de sumir do relatório. O <code>NULLIF</code> evita a divisão por zero. E a receita é atribuída pela data do pedido, não pela do reembolso: o reembolso do dia 20 corrige o ROAS do mês em que a venda aconteceu.</p>
+
+      <h2>Duas conferências antes de confiar no número</h2>
+      <p>Um pipeline idempotente ainda precisa provar que é. Depois de cada carga, ou num teste agendado, duas consultas bastam para pegar a maior parte dos problemas:</p>
+<pre><code><span class="c">-- 1. Nenhuma chave duplicada (precisa voltar vazio)</span>
+<span class="k">SELECT</span> pagamento_id, <span class="k">COUNT</span>(*)
+<span class="k">FROM</span> bronze.pagamentos
+<span class="k">GROUP BY</span> pagamento_id
+<span class="k">HAVING</span> <span class="k">COUNT</span>(*) &gt; <span class="s">1</span>;
+
+<span class="c">-- 2. A receita do relatório bate com a da tabela no mesmo período</span>
+<span class="k">SELECT SUM</span>(pg.valor - pg.valor_reembolsado)
+<span class="k">FROM</span> silver.pedidos p
+<span class="k">JOIN</span> bronze.pagamentos pg <span class="k">ON</span> pg.pedido_id = p.pedido_id
+<span class="k">WHERE</span> pg.status <span class="k">IN</span> (<span class="s">'pago'</span>, <span class="s">'reembolsado'</span>)
+  <span class="k">AND</span> p.criado_em &gt;= <span class="s">'2026-05-01'</span> <span class="k">AND</span> p.criado_em &lt; <span class="s">'2026-06-01'</span>;</code></pre>
+      <p>Com a chave primária em <code>pagamento_id</code>, a primeira volta vazia por construção; ela vale para tabelas em que a chave não é garantida pelo banco. A segunda pega o erro clássico do join: se a soma do relatório passa da soma da tabela, alguma linha foi multiplicada. Se fica abaixo, a soma da tabela inclui pedido de campanha sem gasto no período, o que também merece um olhar.</p>
+
+      <h2>O que eu levo para qualquer pipeline</h2>
+      <ol>
+        <li><strong>Pergunte qual número o negócio vai usar antes de desenhar a carga.</strong> "ROAS sobre receita líquida" decidiu a coluna do watermark, a janela de lookback e a escrita por upsert.</li>
+        <li><strong>Escreva toda carga como se ela fosse rodar duas vezes.</strong> Porque vai: retry, falha no meio, reprocessamento, alguém clicando em "Clear" na interface do Airflow.</li>
+        <li><strong>Watermark e dados mudam juntos.</strong> Se não estão na mesma transação, existe um instante em que o banco mente sobre o que já foi carregado.</li>
+      </ol>
+      <p>O Growth OS também tem modelagem em SQL de RFM, coortes de retenção e LTV, e uma API em TypeScript que serve tudo isso ao painel do cliente. Os detalhes e as telas, com dados fictícios, estão na <a href="/#growth-os">página do projeto</a>.</p>
+    </div>
+
+    <div class="author">
+      <div class="mono accent">Sobre o autor</div>
+      <p>Sou Dyego Seabra, analista de dados sênior em transição para engenharia de dados. Construo pipelines com Apache Airflow, BigQuery e PostgreSQL, modelo dados em SQL e automatizo processos com Python.</p>
+      <div class="links">
+        <a class="pill solid" href="/">Ver portfólio →</a>
+        <a class="pill" href="/artigos/">Outros artigos</a>
+        <a class="pill" href="https://www.linkedin.com/in/dyegoseabradata" target="_blank" rel="noopener">LinkedIn ↗</a>
+      </div>
+    </div>
+  </div>
+</article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Dyego Seabra</span>
+    <span class="mono">Angra dos Reis, RJ · Remoto</span>
+  </div>
+</footer>
+
+<script>
+  // Barra de leitura
+  (function () {
+    var bar = document.querySelector(".progress");
+    function onScroll() {
+      var h = document.documentElement.scrollHeight - innerHeight;
+      bar.style.transform = "scaleX(" + (h > 0 ? scrollY / h : 0) + ")";
+    }
+    addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  })();
+</script>
+</body>
+</html>

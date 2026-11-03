@@ -22,3 +22,12 @@ ssh LPD 'chown -R www-data:www-data /var/www/portfolio'
 ```bash
 python3 -I scripts/llms_full.py .
 ```
+
+## Artigos
+
+Cada artigo é uma página em `artigos/<slug>/index.html`, com o CSS em `assets/artigos.css` (mesmos tokens e header do `index.html`). Artigo novo:
+
+1. Copie a pasta de um artigo existente e troque título, `description`, canonical, Open Graph, `article:published_time` e o JSON-LD `BlogPosting`
+2. Adicione o cartão em `artigos/index.html` (e o `@id` no `blogPost` do JSON-LD) e troque o bloco "Mais recente" da seção `#artigos` do `index.html`
+3. Inclua a URL no `sitemap.xml` e uma linha na seção "Artigos" do `llms.txt`
+4. Rode `python3 -I scripts/llms_full.py .`, que também copia o texto dos artigos para o `llms-full.txt`
